@@ -180,7 +180,7 @@ td.val{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:500}
 }
 
 .tools{display:flex;padding:3px;border-radius:12px;background:var(--raise);margin-top:16px}
-.tools a{flex:1;text-align:center;padding:7px 8px;border-radius:9px;font-weight:600;font-size:.86rem;color:var(--muted);text-decoration:none}
+.tools a{flex:1;text-align:center;padding:7px 4px;border-radius:9px;font-weight:600;font-size:.8rem;color:var(--muted);text-decoration:none}
 .tools a:hover{color:var(--ink)}
 .tools a[aria-current=page]{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px color-mix(in srgb,var(--ink) 18%,transparent)}
 </style>
@@ -192,6 +192,7 @@ td.val{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:500}
       <h1>Banco di mastering</h1>
       <p>Misura e correggi il master nel browser. Il file non esce dal tuo computer.</p>
       <nav class="tools" aria-label="Strumenti">
+        <a href="arrangiatore.html">Arrangia</a>
         <a href="intonazione-voce.html">Voce</a>
         <a href="banco-mix.html">Mix</a>
         <a href="banco-mastering.html" aria-current="page">Mastering</a>
@@ -275,6 +276,7 @@ td.val{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:500}
       <p class="hint" id="refHint">Timbro, multibanda e ampiezza stereo si attivano con un riferimento.</p>
     </div>
 
+    <p class="hint" style="margin:-14px 0 0">Mentre ascolti, ogni modifica si sente dopo un secondo circa. Quando il suono ti convince, correggi il brano intero per poterlo salvare.</p>
     <button class="btn" id="btnFix">Correggi il master</button>
   </aside>
 
@@ -329,8 +331,10 @@ td.val{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:500}
         <button id="selB" aria-pressed="true">Corretto</button>
       </div>
       <div class="pos"><input type="range" id="posR" min="0" max="100" step="0.1" value="0" aria-label="Posizione"><span id="posT" class="num">0:00</span></div>
+      <label class="tog small"><input type="checkbox" id="live" checked><span class="sw"></span>Anteprima dal vivo</label>
       <label class="tog small"><input type="checkbox" id="match" checked><span class="sw"></span>Volume pareggiato</label>
-      <button class="save" id="btnSave">Salva WAV</button>
+      <span class="tr-note" id="liveNote" aria-live="polite"></span>
+      <button class="save" id="btnSave" disabled>Salva WAV</button>
       <span class="tr-note" id="saveNote"></span>
     </div>
   </main>
@@ -354,7 +358,8 @@ const ctx = () => actx || (actx = new (window.AudioContext || window.webkitAudio
 
 const state = { track: null, ref: null, proc: null, trackA: null, refA: null, procA: null, base: "brano", trimStart: 0, gr: 0 };
 
-function setStatus(msg, busy = false) { const s = $("#status"); s.textContent = msg; s.classList.toggle("busy", busy); }
+let QUIET = false;
+function setStatus(msg, busy = false) { if (QUIET) return; const s = $("#status"); s.textContent = msg; s.classList.toggle("busy", busy); }
 
 /* ---------- DSP base ---------- */
 function biquad(x, b, a) {
@@ -546,12 +551,14 @@ async function loadFile(file, which) {
   if (which === "track") {
     state.track = buf; state.base = file.name.replace(/\.[^.]+$/, "").replace(/[^\w\- ]+/g, "").trim() || "brano";
     state.proc = null; state.procA = null; state.prev = null; state.prevA = null; $("#selP").disabled = true; stopPlay();
-    $("#listen").classList.add("hidden"); $("#fixPanel").classList.add("hidden");
+    $("#fixPanel").classList.add("hidden"); $("#btnSave").disabled = true;
     state.trackA = await analyze(buf, "il tuo brano");
+    initLive(); $("#listen").classList.remove("hidden"); pl.off = 0; pl.bufFor = null; labels(); updatePos(); select("B");
   } else {
     state.ref = buf;
     state.refA = await analyze(buf, "il riferimento");
     $("#target option[value=ref]").disabled = false;
+    LIVE.plan = null; LIVE.firKey = ""; LIVE.win = null; if (state.track) scheduleLive();
   }
   setStatus("");
   render();
@@ -1032,31 +1039,180 @@ $("#btnFix").addEventListener("click", async () => {
     if ($("#oTrim").checked) { const r = trim(ch, sr); ch = r.ch; trimStart = r.start; }
     const procA = await analyze({ sr, ch }, "la versione corretta");
     if (state.proc) { state.prev = state.proc; state.prevA = state.procA; state.prevTrim = state.trimStart; }
-    state.proc = { sr, ch }; state.procA = procA; state.trimStart = trimStart; state.gr = gr;
+    state.proc = { sr, ch }; state.procA = procA; state.trimStart = trimStart; state.gr = gr; state.procVer = (state.procVer || 0) + 1;
+    $("#btnSave").disabled = false;
     setStatus("Correzione completata.");
     let note = `Pronto: ${f(procA.I)} LUFS, true peak ${f(procA.tp)} dBTP.`;
     if (gr > 0.1) note += ` Il limiter ha ridotto al massimo di ${f(gr)} dB${gr > 6 ? ": è tanto, se il brano perde impatto prova un target più basso" : ""}.`;
     $("#fixNote").innerHTML = [note, ...info].map(x => `<span style="display:block">${x}</span>`).join("");
-    $("#selP").disabled = !state.prev;
-    $("#listen").classList.remove("hidden"); $("#fixPanel").classList.remove("hidden");
+    $("#listen").classList.remove("hidden"); $("#fixPanel").classList.remove("hidden"); pl.bufFor = null; labels();
     render();
   } catch (e) {
     setStatus("La correzione si è interrotta: il file potrebbe essere troppo lungo per la memoria del browser. Prova con un brano più corto o chiudi altre schede.");
   } finally { btn.disabled = false; }
 });
 
-/* ---------- Ascolto A/B/C ---------- */
+/* ---------- Anteprima dal vivo ---------- */
+// Rielabora solo ~20 secondi attorno al punto d'ascolto con la stessa catena della correzione completa.
+// Le grandezze che dipendono dal brano intero (soglie, picco, volume) vengono prese dal brano originale
+// e spostate di quanto il tratto elaborato differisce dallo stesso tratto originale.
+const LIVE = { plan: null, planFor: null, busy: false, again: false, win: null, fir: null, firKey: "", glueThr: {}, timer: 0 };
+const WIN = 20, PRE = 1.0;
+function winLoud(ch, sr) { const I = loudness({ sr, ch }).I; return isFinite(I) ? I : -70; }
+async function ensurePlan() {
+  const key = state.track && (state.track.ch[0].length + ":" + (state.ref ? state.ref.ch[0].length : 0));
+  if (LIVE.plan && LIVE.planFor === key) return LIVE.plan;
+  const { sr, ch } = state.track, n = ch[0].length;
+  QUIET = true;
+  const plan = { dc: ch.map(x => { let s = 0; for (let i = 0; i < n; i++) s += x[i]; return s / n; }) };
+  let p = 0; for (const x of ch) for (let i = 0; i < n; i++) { const v = Math.abs(x[i]); if (v > p) p = v; }
+  plan.peak = p; plan.I = state.trackA.I;
+  $("#liveNote").textContent = "Preparo l'anteprima…"; await tick();
+  plan.glueDet = detector(ch[0], ch[1], sr, 10, 90);
+  if (state.ref) {
+    const rb = await refBands(); await tick();
+    const bl = split4(ch[0], sr); await tick(); const br = split4(ch[1], sr);
+    plan.bands = bl.map((b, i) => bandStats(b, br[i], sr)); plan.ref = rb;
+  }
+  QUIET = false;
+  LIVE.plan = plan; LIVE.planFor = key; LIVE.glueThr = {};
+  return plan;
+}
+function glueThrFor(target) {
+  if (LIVE.glueThr[target] !== undefined) return LIVE.glueThr[target];
+  const det = LIVE.plan.glueDet, sr = state.track.sr, samp = [];
+  for (let i = 0; i < det.length; i += 32) if (det[i] > -60) samp.push(det[i]);
+  let lo = -70, hi = 0;
+  for (let it = 0; it < 30; it++) { const mid = (lo + hi) / 2; let s = 0; for (const v of samp) s += staticGR(v - mid, 2, 6); if (s / samp.length > target) lo = mid; else hi = mid; }
+  let thr = (lo + hi) / 2;
+  for (let it = 0; it < 5; it++) {
+    const gr = smoothGR(det, sr, thr, 2, 6, 30, 300); let s = 0, c = 0;
+    for (let i = 0; i < det.length; i += 32) if (det[i] > -60) { s += gr[i]; c++; }
+    const avg = s / Math.max(1, c); if (Math.abs(avg - target) < 0.1) break; thr += (avg - target) * 1.6;
+  }
+  return LIVE.glueThr[target] = thr;
+}
+function firFor(str) {
+  const key = str + ":" + state.track.sr;
+  if (LIVE.firKey !== key) { LIVE.fir = firFromCurve(matchCurve(state.trackA.spec, state.refA.spec, str), state.track.sr); LIVE.firKey = key; }
+  return LIVE.fir;
+}
+async function renderWindow(center) {
+  const plan = await ensurePlan(), { sr } = state.track, src = state.track.ch, n = src[0].length;
+  const a = Math.max(0, Math.round((center - 1.5) * sr)), b = Math.min(n, a + Math.round(WIN * sr)), a0 = Math.max(0, a - Math.round(PRE * sr));
+  const orig = src.map(x => x.slice(a0, b)), Lo = winLoud(orig, sr);
+  const shiftOf = ch => winLoud(ch, sr) - Lo;
+  const hasRef = !!state.refA, t = target();
+  let ch = orig.map(x => x.slice());
+  if ($("#oDc").checked) { const hp = rbj("hp", 10, sr); ch = ch.map((x, c) => { const y = new Float32Array(x.length); for (let i = 0; i < x.length; i++) y[i] = x[i] - plan.dc[c]; return filt(y, hp); }); }
+  if ($("#oEq").checked && hasRef) ch = await convolveStereo(ch[0], ch[1], firFor($("#eqStr").value / 100));
+  const mono = $("#oMono").checked;
+  if (mono) ch = monoBass(ch, sr, parseFloat($("#monoF").value));
+  const mb = hasRef && $("#oMb").checked ? $("#mbStr").value / 100 : 0, w = hasRef && $("#oW").checked ? $("#wStr").value / 100 : 0;
+  if ((mb || w) && plan.bands) ch = multiWindow(ch, orig, sr, mb, w, mono, plan);
+  if ($("#oGlue").checked) {
+    const thr = glueThrFor(parseFloat($("#glueAmt").value)) + shiftOf(ch);
+    const det = detector(ch[0], ch[1], sr, 10, 90), gr = smoothGR(det, sr, thr, 2, 6, 30, 300);
+    ch = ch.map(x => x.slice()); gainByGR(ch[0], ch[1], gr);
+  }
+  const envA = +$("#envAtk").value, envS = +$("#envSus").value;
+  if ($("#oEnv") && $("#oEnv").checked && (envA || envS)) ch = envShaper(ch, sr, envA, envS, []);
+  if ($("#oSat").checked && +$("#satAmt").value > 0) ch = satWithPeak(ch, $("#satAmt").value / 100, plan.peak * dbToLin(shiftOf(ch)));
+  if ($("#oLoud").checked) { const r = await toTarget(ch, sr, t.I - (plan.I - Lo), t.ceil); ch = r.ch; }
+  const skip = a - a0, out = ch.map(x => x.subarray(skip));
+  return { a, b, out, estI: plan.I + (winLoud(out, sr) - winLoud(src.map(x => x.subarray(a, b)), sr)) };
+}
+function multiWindow(ch, orig, sr, mb, w, keepLowMono, plan) {
+  const bl = split4(ch[0], sr), br = split4(ch[1], sr), ol = split4(orig[0], sr), or = split4(orig[1], sr);
+  const times = [[30, 200], [20, 150], [10, 100], [5, 80]];
+  const rmsDb = (L, R) => { let s = 0; for (let i = 0; i < L.length; i += 4) s += L[i] * L[i] + R[i] * R[i]; return 10 * Math.log10(s / (L.length / 2) + 1e-20); };
+  for (let b = 0; b < 4; b++) {
+    const L = bl[b], R = br[b], ts = plan.bands[b], rs = plan.ref[b];
+    if (mb && ts.spread > rs.spread + 0.5 && rs.spread > 0.5) {
+      const ratio = 1 + (Math.min(4, ts.spread / rs.spread) - 1) * mb, thr = ts.p50 + (rmsDb(L, R) - rmsDb(ol[b], or[b]));
+      const det = detector(L, R, sr, 10), gr = smoothGR(det, sr, thr, ratio, 6, times[b][0], times[b][1]);
+      const before = energy(L, R); gainByGR(L, R, gr);
+      const mk = Math.sqrt(before / (energy(L, R) + 1e-20)); for (let i = 0; i < L.length; i++) { L[i] *= mk; R[i] *= mk; }
+    }
+    if (w && !(b === 0 && keepLowMono) && isFinite(ts.side) && ts.side > -60) {
+      const db = Math.max(-6, Math.min(6, rs.side - ts.side)) * w;
+      if (Math.abs(db) > 0.3) { const g = dbToLin(db); for (let i = 0; i < L.length; i++) { const m = (L[i] + R[i]) * 0.5, s = (L[i] - R[i]) * 0.5 * g; L[i] = m + s; R[i] = m - s; } }
+    }
+  }
+  const n = ch[0].length, oL = new Float32Array(n), oR = new Float32Array(n);
+  for (let b = 0; b < 4; b++) for (let i = 0; i < n; i++) { oL[i] += bl[b][i]; oR[i] += br[b][i]; }
+  return [oL, oR];
+}
+function satWithPeak(ch, amt, p) {
+  const g = 0.3 + amt * 1.7, norm = Math.tanh(g), c = TP[1];
+  if (!(p > 1e-6)) return ch;
+  const sat = v => Math.tanh(g * v / p) / norm * p;
+  return ch.map(x => {
+    const n = x.length, sO = new Float32Array(n), o = new Float32Array(n);
+    for (let i = 0; i < n; i++) { let v = x[i]; if (i >= 5 && i < n - 6) { v = 0; for (let j = 0; j < 12; j++) v += c[j] * x[i - 5 + j]; } sO[i] = sat(v); }
+    for (let i = 0; i < n; i++) { let v = sO[i]; if (i >= 6 && i < n - 5) { v = 0; for (let j = 0; j < 12; j++) v += c[j] * sO[i - 6 + j]; } o[i] = 0.5 * sat(x[i]) + 0.5 * v; }
+    return o;
+  });
+}
+function liveOn() { return $("#live").checked && !!state.track; }
+function initLive() {
+  state.live = state.track.ch.map(x => x.slice()); state.liveVer = 0; state.liveI = state.trackA.I;
+  LIVE.win = null; LIVE.plan = null;
+}
+async function updateLive(center) {
+  if (!liveOn()) return;
+  if (LIVE.busy) { LIVE.again = center; return; }
+  LIVE.busy = true; $("#liveNote").textContent = "Aggiorno l'anteprima…";
+  try {
+    const QUIET_prev = QUIET; QUIET = true;
+    const r = await renderWindow(center);
+    QUIET = QUIET_prev;
+    const sr = state.track.sr, fade = Math.round(sr * 0.05);
+    // incolla il tratto elaborato con brevi dissolvenze ai bordi
+    for (let c = 0; c < 2; c++) {
+      const dst = state.live[c], orig = state.track.ch[c], o = r.out[c];
+      for (let i = 0; i < o.length; i++) {
+        const k = Math.min(1, i / fade, (o.length - 1 - i) / fade), j = r.a + i;
+        dst[j] = r.a === 0 && i < fade ? o[i] : k * o[i] + (1 - k) * orig[j];
+      }
+    }
+    LIVE.win = { a: r.a / sr, b: r.b / sr }; state.liveI = r.estI; state.liveVer++;
+    $("#liveNote").textContent = "Anteprima aggiornata";
+    if (pl.playing && pl.which === "B") restartPlay();
+  } catch (e) { console.error(e); QUIET = false; $("#liveNote").textContent = "Anteprima non riuscita"; }
+  finally {
+    LIVE.busy = false;
+    if (LIVE.again !== false) { const c = LIVE.again; LIVE.again = false; updateLive(pl.playing ? currentPos() : c); }
+  }
+}
+function scheduleLive() {
+  if (!liveOn()) return;
+  clearTimeout(LIVE.timer);
+  LIVE.timer = setTimeout(() => updateLive(currentPos()), 280);
+}
+document.querySelectorAll(".rail .mods, .rail .fields").forEach(el => {
+  el.addEventListener("input", e => { if (e.target.type !== "file") scheduleLive(); });
+  el.addEventListener("change", e => { if (e.target.type !== "file") scheduleLive(); });
+});
+
+/* ---------- Ascolto: originale, precedente/ultima correzione, corretto/anteprima ---------- */
 const pl = { src: null, gains: null, t0: 0, off: 0, playing: false, which: "B", raf: 0, bufs: null, bufFor: null };
 function toAB(b) { const ab = ctx().createBuffer(2, b.ch[0].length, b.sr); ab.copyToChannel(b.ch[0], 0); ab.copyToChannel(b.ch[1], 1); return ab; }
 function versions() {
-  const v = { A: { buf: state.track, an: state.trackA, ts: 0 }, B: { buf: state.proc, an: state.procA, ts: state.trimStart } };
-  if (state.prev) v.P = { buf: state.prev, an: state.prevA, ts: state.prevTrim };
+  const A = { buf: state.track, I: state.trackA.I, ts: 0 };
+  if (liveOn()) {
+    const v = { A, B: { buf: { sr: state.track.sr, ch: state.live }, I: state.liveI, ts: 0 } };
+    if (state.proc) v.P = { buf: state.proc, I: state.procA.I, ts: state.trimStart };
+    return v;
+  }
+  const v = { A, B: state.proc ? { buf: state.proc, I: state.procA.I, ts: state.trimStart } : { buf: state.track, I: state.trackA.I, ts: 0 } };
+  if (state.prev) v.P = { buf: state.prev, I: state.prevA.I, ts: state.prevTrim };
   return v;
 }
+function bufKey() { return liveOn() ? "L" + state.liveVer + "|" + (state.procVer || 0) : state.proc; }
 function levelGains() {
-  const v = versions(), g = {};
-  const min = Math.min(...Object.values(v).map(x => x.an.I));
-  for (const k in v) g[k] = $("#match").checked ? dbToLin(min - v[k].an.I) : 1;
+  const v = versions(), g = {}, min = Math.min(...Object.values(v).map(x => x.I));
+  for (const k in v) g[k] = $("#match").checked ? dbToLin(min - v[k].I) : 1;
   return g;
 }
 function applyGains() {
@@ -1064,25 +1220,46 @@ function applyGains() {
   const g = levelGains(), now = ctx().currentTime;
   for (const k in pl.gains) pl.gains[k].gain.setTargetAtTime(pl.which === k ? g[k] : 0, now, 0.01);
 }
-function startPlay() {
+function labels() {
+  const live = liveOn();
+  $("#selP").textContent = live ? "Ultima correzione" : "Precedente";
+  $("#selB").textContent = live ? "Anteprima" : "Corretto";
+  $("#selP").disabled = !versions().P;
+  if (pl.which === "P" && $("#selP").disabled) select("B");
+}
+function startPlay(fadeIn = false) {
+  if (!state.track) return;
   const c = ctx(); c.resume();
-  const v = versions();
-  if (pl.bufFor !== state.proc) { pl.bufs = {}; for (const k in v) pl.bufs[k] = toAB(v[k].buf); pl.bufFor = state.proc; }
+  const v = versions(), key = bufKey();
+  if (pl.bufFor !== key) { pl.bufs = {}; for (const k in v) pl.bufs[k] = toAB(v[k].buf); pl.bufFor = key; }
   if (pl.which === "P" && !v.P) select("B");
   const dur = pl.bufs.B.duration; if (pl.off >= dur - 0.05) pl.off = 0;
-  const when = c.currentTime + 0.03; pl.gains = {}; pl.src = {};
+  const when = c.currentTime + 0.03, bTs = v.B.ts; pl.gains = {}; pl.src = {};
   for (const k in v) {
     const g = c.createGain(); g.gain.value = 0; g.connect(c.destination);
     const s = c.createBufferSource(); s.buffer = pl.bufs[k]; s.connect(g);
-    const off = Math.max(0, Math.min(pl.bufs[k].duration, pl.off + (state.trimStart - v[k].ts) / v[k].buf.sr));
+    const off = Math.max(0, Math.min(pl.bufs[k].duration, pl.off + (bTs - v[k].ts) / v[k].buf.sr));
     s.start(when, off); pl.gains[k] = g; pl.src[k] = s;
   }
   const sB = pl.src.B;
   sB.onended = () => { if (pl.src && pl.src.B === sB) { stopPlay(); pl.off = 0; updatePos(); } };
   pl.t0 = when; pl.playing = true;
   applyGains(); playIcon(true);
-  const loop = () => { if (!pl.playing) return; updatePos(); pl.raf = requestAnimationFrame(loop); };
+  const loop = () => {
+    if (!pl.playing) return; updatePos();
+    // anteprima continua: prepara il tratto successivo prima di arrivarci
+    if (liveOn() && !LIVE.busy && (!LIVE.win || currentPos() > LIVE.win.b - 5 || currentPos() < LIVE.win.a)) updateLive(currentPos());
+    pl.raf = requestAnimationFrame(loop);
+  };
   loop();
+}
+function restartPlay() {
+  if (!pl.playing) return;
+  const pos = currentPos(), old = pl.src, oldG = pl.gains, now = ctx().currentTime;
+  for (const k in oldG) oldG[k].gain.setTargetAtTime(0, now, 0.012);
+  setTimeout(() => Object.values(old).forEach(s => { try { s.onended = null; s.stop(); } catch (e) {} }), 80);
+  cancelAnimationFrame(pl.raf); pl.src = null; pl.playing = false; pl.off = pos;
+  startPlay();
 }
 function stopPlay() {
   if (pl.playing) pl.off = currentPos();
@@ -1092,8 +1269,8 @@ function stopPlay() {
 }
 function currentPos() { return pl.playing ? pl.off + Math.max(0, ctx().currentTime - pl.t0) : pl.off; }
 function updatePos() {
-  if (!state.proc) return;
-  const dur = state.proc.ch[0].length / state.proc.sr, p = Math.min(currentPos(), dur);
+  if (!state.track) return;
+  const B = versions().B.buf, dur = B.ch[0].length / B.sr, p = Math.min(currentPos(), dur);
   $("#posR").max = dur.toFixed(1); $("#posR").value = p.toFixed(1);
   $("#posT").textContent = `${fmtTime(p)} / ${fmtTime(dur)}`;
 }
@@ -1103,11 +1280,18 @@ function select(w) {
   applyGains();
 }
 $("#btnPlay").addEventListener("click", () => pl.playing ? stopPlay() : startPlay());
-$("#posR").addEventListener("input", e => { const was = pl.playing; stopPlay(); pl.off = parseFloat(e.target.value); updatePos(); if (was) startPlay(); });
+$("#posR").addEventListener("input", e => { const was = pl.playing; stopPlay(); pl.off = parseFloat(e.target.value); updatePos(); if (was) startPlay(); else scheduleLive(); });
 $("#selA").addEventListener("click", () => select("A"));
 $("#selP").addEventListener("click", () => select("P"));
 $("#selB").addEventListener("click", () => select("B"));
 $("#match").addEventListener("change", applyGains);
+$("#live").addEventListener("change", () => {
+  const was = pl.playing; stopPlay();
+  if (liveOn() && !state.live) initLive();
+  labels(); updatePos(); $("#liveNote").textContent = "";
+  if (liveOn()) updateLive(pl.off);
+  if (was) startPlay();
+});
 
 /* ---------- Salvataggio WAV (in zip) ---------- */
 function wav24(ch, sr) {
