@@ -183,6 +183,9 @@ td.val{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:500}
 .tools a{flex:1;text-align:center;padding:7px 4px;border-radius:9px;font-weight:600;font-size:.8rem;color:var(--muted);text-decoration:none}
 .tools a:hover{color:var(--ink)}
 .tools a[aria-current=page]{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px color-mix(in srgb,var(--ink) 18%,transparent)}
+.refclear{margin-top:8px;border:0;background:transparent;color:var(--muted);font-size:.8rem;text-decoration:underline;cursor:pointer;padding:0}
+.refclear:hover{color:var(--ink)}
+.shared{display:inline-block;margin-left:6px;font-size:.72rem;font-weight:600;padding:1px 7px;border-radius:99px;background:var(--raise);color:var(--muted)}
 </style>
 </head>
 <body>
@@ -536,7 +539,22 @@ async function analyze(buf, label) {
 }
 
 /* ---------- Caricamento ---------- */
-async function loadFile(file, which) {
+/* ---------- Riferimento condiviso tra gli strumenti (salvato nel browser) ---------- */
+const REFDB = {
+  open() { return new Promise((res, rej) => { const r = indexedDB.open("banco-studio", 1); r.onupgradeneeded = () => r.result.createObjectStore("files"); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); },
+  async put(name, buf) { try { const db = await this.open(); await new Promise((res, rej) => { const tx = db.transaction("files", "readwrite"); tx.objectStore("files").put({ name, buf, t: Date.now() }, "ref"); tx.oncomplete = res; tx.onerror = () => rej(tx.error); }); return true; } catch (e) { return false; } },
+  async get() { try { const db = await this.open(); return await new Promise(res => { const q = db.transaction("files").objectStore("files").get("ref"); q.onsuccess = () => res(q.result || null); q.onerror = () => res(null); }); } catch (e) { return null; } },
+  async del() { try { const db = await this.open(); await new Promise(res => { const tx = db.transaction("files", "readwrite"); tx.objectStore("files").delete("ref"); tx.oncomplete = res; tx.onerror = res; }); } catch (e) {} },
+};
+async function shareRef(file) { try { const buf = await file.arrayBuffer(); await REFDB.put(file.name, buf.slice(0)); } catch (e) {} }
+async function sharedRefFile() { const r = await REFDB.get(); return r ? new File([r.buf], r.name) : null; }
+function refClearButton(afterEl) {
+  const b = document.createElement("button"); b.className = "refclear hidden"; b.id = "refClear"; b.type = "button";
+  b.textContent = "Rimuovi il riferimento da tutti gli strumenti";
+  b.addEventListener("click", async () => { await REFDB.del(); location.reload(); });
+  afterEl.insertAdjacentElement("afterend", b); return b;
+}
+async function loadFile(file, which, fromShared = false) {
   if (!file) return;
   setStatus(`Apro ${file.name}…`, true); await tick();
   let ab;
@@ -558,6 +576,8 @@ async function loadFile(file, which) {
     state.ref = buf;
     state.refA = await analyze(buf, "il riferimento");
     $("#target option[value=ref]").disabled = false;
+    if (!fromShared) shareRef(file);
+    $("#nameRef").insertAdjacentHTML("beforeend", ` <span class="shared">condiviso</span>`); $("#refClear").classList.remove("hidden");
     LIVE.plan = null; LIVE.firKey = ""; LIVE.win = null; if (state.track) scheduleLive();
   }
   setStatus("");
@@ -1346,6 +1366,8 @@ $("#btnSave").addEventListener("click", async () => {
   } catch (e) { $("#saveNote").textContent = "Il salvataggio non è riuscito: il brano potrebbe essere troppo lungo per la memoria del browser."; }
   finally { btn.disabled = false; }
 });
+refClearButton($("#dropRef"));
+(async () => { const f = await sharedRefFile(); if (f) loadFile(f, "ref", true); })();
 })();
 
 </script>
