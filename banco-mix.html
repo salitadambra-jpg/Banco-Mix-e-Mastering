@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow, noarchive">
-<title>Banco di mastering</title>
+<title>Banco di mix</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -135,7 +135,7 @@ th{font-size:.8rem;font-weight:500;color:var(--muted);padding-top:0}
 tr:last-child td{border-bottom:0}
 td.label{padding-left:0}
 td.label b{display:block;font-weight:600}
-td.label small{color:var(--muted);font-size:.82rem;display:block;max-width:40ch}
+td.label small{color:var(--muted);font-size:.82rem}
 td.val{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:500}
 .badge{display:inline-flex;align-items:center;gap:5px;margin-left:10px;font-size:.75rem;font-weight:600;padding:2px 9px 2px 7px;border-radius:99px;background:color-mix(in srgb,var(--c) 16%,transparent);color:var(--c)}
 .badge::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c)}
@@ -143,11 +143,10 @@ td.val{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:500}
 
 /* Problemi */
 .issues{list-style:none;margin:0;padding:0;display:grid;gap:2px}
-.issues li{display:grid;grid-template-columns:160px minmax(0,72ch);gap:4px 18px;padding:12px 0;border-bottom:1px solid var(--line)}
+.issues li{display:grid;grid-template-columns:150px 1fr;gap:4px 18px;padding:12px 0;border-bottom:1px solid var(--line)}
 .issues li:last-child{border-bottom:0}
 .issues em{font-style:normal;font-size:.78rem;font-weight:600;align-self:start;justify-self:start;padding:3px 10px;border-radius:99px;background:color-mix(in srgb,var(--c) 16%,transparent);color:var(--c)}
 .issues li.fix{--c:var(--ok)} .issues li.mix{--c:var(--bad)} .issues li.info{--c:var(--warn)}
-.results{display:flex;flex-direction:column;gap:22px}
 .two{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:22px;align-items:start}
 
 /* Esito correzione */
@@ -179,6 +178,40 @@ td.val{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:500}
   .issues li{grid-template-columns:1fr}
 }
 
+/* Tracce */
+.tracks-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+.tracks-head h2{margin:0;font-size:1.05rem;font-weight:600}
+.tracks-head .acts{display:flex;gap:8px;align-items:center}
+.ghost{border:1.5px solid var(--line);background:transparent;border-radius:10px;padding:7px 12px;font-weight:600;cursor:pointer;font-size:.88rem;position:relative}
+.ghost:hover{border-color:var(--ink)}
+.ghost input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.warn{font-size:.85rem;color:var(--warn);margin:4px 0 8px}
+.trk{display:grid;grid-template-columns:minmax(180px,1.4fr) 130px 130px minmax(120px,1fr) minmax(120px,1fr) 32px;gap:10px 16px;align-items:center;padding:12px 0 12px 14px;border-bottom:1px solid var(--line);position:relative}
+.trk::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:4px;border-radius:2px;background:var(--c)}
+.trk:last-child{border-bottom:0}
+.trk.off{opacity:.45}
+.tname{display:flex;align-items:center;gap:12px;min-width:0}
+.tname div{min-width:0}
+.tname b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tname small{color:var(--muted);font-size:.8rem}
+.fld{display:flex;flex-direction:column;gap:4px;font-size:.75rem;color:var(--muted);min-width:0}
+.fld select{padding:6px 8px;font-size:.88rem}
+.fld select:disabled{opacity:.5}
+.rr{display:flex;align-items:center;gap:8px}
+.rr input{flex:1;min-width:0;accent-color:var(--s4)}
+.rr output{min-width:52px;text-align:right;color:var(--ink);font-variant-numeric:tabular-nums;font-size:.85rem}
+.x{border:0;background:transparent;color:var(--muted);font-size:1.4rem;line-height:1;cursor:pointer;border-radius:8px;width:32px;height:32px}
+.x:hover{background:var(--raise);color:var(--ink)}
+.tog.mini .sw{width:30px;height:18px}.tog.mini .sw::after{width:12px;height:12px}.tog.mini input:checked + .sw::after{transform:translateX(12px)}
+.log{margin:0;padding:0 0 0 18px;display:grid;gap:4px;font-size:.9rem}
+.log li::marker{color:var(--muted)}
+.dls{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0 6px}
+.dls .save:first-child{background:var(--ink);color:var(--bg)}
+.text-in{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;color:var(--ink);width:100%}
+.guide{margin:14px auto 0;max-width:52ch;text-align:left;color:var(--muted);font-size:.9rem;padding-left:20px}
+.guide li{margin:4px 0}
+@media (max-width:1180px){.trk{grid-template-columns:minmax(0,1fr) minmax(0,1fr);}.tname{grid-column:1/-1}.x{position:absolute;right:0;top:8px}}
+
 .tools{display:flex;padding:3px;border-radius:12px;background:var(--raise);margin-top:16px}
 .tools a{flex:1;text-align:center;padding:7px 4px;border-radius:9px;font-weight:600;font-size:.8rem;color:var(--muted);text-decoration:none}
 .tools a:hover{color:var(--ink)}
@@ -189,158 +222,121 @@ td.val{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:500}
 <div class="app">
   <aside class="rail">
     <div class="brand">
-      <h1>Banco di mastering</h1>
-      <p>Misura e correggi il master nel browser. Il file non esce dal tuo computer.</p>
+      <h1>Banco di mix</h1>
+      <p>Carica le tracce del brano: ogni strumento viene trattato, bilanciato e masterizzato. Tutto resta nel tuo computer.</p>
       <nav class="tools" aria-label="Strumenti">
         <a href="arrangiatore.html">Arrangia</a>
         <a href="intonazione-voce.html">Voce</a>
-        <a href="banco-mix.html">Mix</a>
-        <a href="banco-mastering.html" aria-current="page">Mastering</a>
+        <a href="banco-mix.html" aria-current="page">Mix</a>
+        <a href="banco-mastering.html">Mastering</a>
       </nav>
     </div>
-
     <div class="group">
-      <h2>Brani</h2>
-      <div class="drops">
-        <label class="drop track" id="dropTrack">
-          <input type="file" id="fileTrack" accept="audio/*,.wav,.flac,.mp3,.m4a,.ogg,.aif,.aiff">
-          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
-          <span><b>Il tuo brano</b><small class="file" id="nameTrack"></small><small id="hintTrack">WAV o FLAC per la massima precisione</small></span>
-        </label>
+      <h2>Brano</h2>
+      <input class="text-in" id="title" placeholder="Titolo del brano" aria-label="Titolo del brano">
+      <div class="drops" style="margin-top:10px">
         <label class="drop ref" id="dropRef">
           <input type="file" id="fileRef" accept="audio/*,.wav,.flac,.mp3,.m4a,.ogg,.aif,.aiff">
           <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></span>
-          <span><b>Riferimento</b><small class="file" id="nameRef"></small><small id="hintRef">Facoltativo, stesso genere</small></span>
+          <span><b>Riferimento</b><small class="file" id="nameRef"></small><small id="hintRef">Facoltativo, un brano professionale simile</small></span>
         </label>
       </div>
       <div class="status" id="status" role="status" aria-live="polite"></div>
     </div>
-
     <div class="group">
-      <h2>Obiettivo</h2>
-      <div class="fields">
+      <h2>Mix</h2>
+      <div class="mods">
+        <div class="mod">
+          <div style="font-weight:500;margin-bottom:8px">Riverbero</div>
+          <div class="seg" id="rev" data-v="medio" role="group" aria-label="Riverbero">
+            <button data-v="secco" aria-pressed="false">Asciutto</button>
+            <button data-v="medio" aria-pressed="true">Medio</button>
+            <button data-v="ampio" aria-pressed="false">Ampio</button>
+          </div>
+        </div>
+        <div class="mod"><label class="tog"><input type="checkbox" id="oGlue" checked><span class="sw"></span>Glue sul bus del mix</label></div>
+        <div class="mod"><label class="tog"><input type="checkbox" id="oStems"><span class="sw"></span>Conserva le tracce elaborate</label><p class="hint">Per scaricarle e reimportarle nella DAW. Usa molta memoria.</p></div>
+      </div>
+    </div>
+    <div class="group">
+      <h2>Master</h2>
+      <div class="mods">
+        <div class="mod"><label class="tog"><input type="checkbox" id="oMaster" checked><span class="sw"></span>Masterizza il mix</label></div>
+        <div class="mod disabled" id="eqMod"><label class="tog"><input type="checkbox" id="oEq" checked disabled><span class="sw"></span>Timbro come il riferimento</label></div>
+      </div>
+      <div class="fields" style="margin-top:10px">
         <label>Volume
           <select id="target">
             <option value="-14">Streaming, −14</option>
-            <option value="-11">Equilibrato, −11</option>
-            <option value="-9" selected>Rock forte, −9</option>
+            <option value="-11" selected>Equilibrato, −11</option>
+            <option value="-9">Rock forte, −9</option>
             <option value="ref" disabled>Come il riferimento</option>
           </select>
         </label>
         <label>Tetto picchi
-          <select id="ceil">
-            <option value="-1" selected>−1,0 dBTP</option>
-            <option value="-0.5">−0,5 dBTP</option>
-            <option value="-0.3">−0,3 dBTP</option>
-          </select>
+          <select id="ceil"><option value="-1" selected>−1,0 dBTP</option><option value="-0.5">−0,5 dBTP</option><option value="-0.3">−0,3 dBTP</option></select>
         </label>
       </div>
     </div>
-
-    <div class="group">
-      <h2>Correzione</h2>
-      <div class="mods">
-        <div class="mod"><label class="tog"><input type="checkbox" id="oDc" checked><span class="sw"></span>Rimuovi DC offset</label></div>
-        <div class="mod needs-ref">
-          <label class="tog"><input type="checkbox" id="oEq" checked><span class="sw"></span>Timbro come il riferimento</label>
-          <div class="sl">Intensità <input type="range" id="eqStr" min="20" max="100" value="70" data-unit="%" aria-label="Intensità EQ"><span class="num" data-for="eqStr"></span></div>
-        </div>
-        <div class="mod">
-          <label class="tog"><input type="checkbox" id="oMono" checked><span class="sw"></span>Bassi in mono</label>
-          <div class="inline-sel">sotto <select id="monoF" aria-label="Frequenza"><option>80</option><option>100</option><option selected>120</option><option>150</option></select> Hz</div>
-        </div>
-        <div class="mod needs-ref">
-          <label class="tog"><input type="checkbox" id="oMb" checked><span class="sw"></span>Multibanda sul riferimento</label>
-          <div class="sl">Intensità <input type="range" id="mbStr" min="20" max="100" value="70" data-unit="%" aria-label="Intensità multibanda"><span class="num" data-for="mbStr"></span></div>
-        </div>
-        <div class="mod needs-ref">
-          <label class="tog"><input type="checkbox" id="oW" checked><span class="sw"></span>Ampiezza stereo sul riferimento</label>
-          <div class="sl">Intensità <input type="range" id="wStr" min="20" max="100" value="60" data-unit="%" aria-label="Intensità ampiezza stereo"><span class="num" data-for="wStr"></span></div>
-        </div>
-        <div class="mod">
-          <label class="tog"><input type="checkbox" id="oGlue" checked><span class="sw"></span>Glue compressor</label>
-          <div class="sl">Riduzione <input type="range" id="glueAmt" min="0.5" max="4" step="0.5" value="1.5" data-unit=" dB" data-dec="1" aria-label="Riduzione media"><span class="num" data-for="glueAmt"></span></div>
-        </div>
-        <div class="mod">
-          <label class="tog"><input type="checkbox" id="oEnv" checked><span class="sw"></span>Envelope shaper</label>
-          <div class="sl">Attacco <input type="range" id="envAtk" min="-6" max="6" step="0.5" value="2" data-unit=" dB" data-dec="1" aria-label="Attacco"><span class="num" data-for="envAtk"></span></div>
-          <div class="sl">Sustain <input type="range" id="envSus" min="-6" max="6" step="0.5" value="0" data-unit=" dB" data-dec="1" aria-label="Sustain"><span class="num" data-for="envSus"></span></div>
-        </div>
-        <div class="mod">
-          <label class="tog"><input type="checkbox" id="oSat" checked><span class="sw"></span>Saturazione nastro</label>
-          <div class="sl">Calore <input type="range" id="satAmt" min="0" max="100" value="35" data-unit="%" aria-label="Calore"><span class="num" data-for="satAmt"></span></div>
-        </div>
-        <div class="mod"><label class="tog"><input type="checkbox" id="oLoud" checked><span class="sw"></span>Volume target con limiter</label></div>
-        <div class="mod"><label class="tog"><input type="checkbox" id="oTrim" checked><span class="sw"></span>Rifila silenzi e micro-fade</label></div>
-      </div>
-      <p class="hint" id="refHint">Timbro, multibanda e ampiezza stereo si attivano con un riferimento.</p>
-    </div>
-
-    <p class="hint" style="margin:-14px 0 0">Mentre ascolti, ogni modifica si sente dopo un secondo circa. Quando il suono ti convince, correggi il brano intero per poterlo salvare.</p>
-    <button class="btn" id="btnFix">Correggi il master</button>
+    <button class="btn" id="btnMix">Mixa il brano</button>
   </aside>
 
   <main class="main">
-    <label class="empty" id="empty" for="fileTrack">
+    <label class="empty" id="empty" for="files">
       <div>
         <div class="bars" aria-hidden="true">
-          <i style="--c:var(--s1);height:38%"></i><i style="--c:var(--s1);height:62%"></i><i style="--c:var(--s2);height:86%"></i><i style="--c:var(--s2);height:70%"></i><i style="--c:var(--s3);height:100%"></i><i style="--c:var(--s3);height:78%"></i><i style="--c:var(--s4);height:58%"></i><i style="--c:var(--s4);height:44%"></i><i style="--c:var(--s5);height:30%"></i><i style="--c:var(--s5);height:18%"></i>
+          <i style="--c:var(--s1);height:70%"></i><i style="--c:var(--s1);height:90%"></i><i style="--c:var(--s2);height:55%"></i><i style="--c:var(--s3);height:80%"></i><i style="--c:var(--s3);height:65%"></i><i style="--c:var(--s4);height:100%"></i><i style="--c:var(--s4);height:85%"></i><i style="--c:var(--s5);height:95%"></i><i style="--c:var(--s5);height:40%"></i>
         </div>
-        <h2>Trascina qui il tuo brano</h2>
-        <p>Oppure clicca per sceglierlo. L'analisi parte subito: volume, picchi, dinamica, stereo e timbro.</p>
+        <h2>Trascina qui tutte le tracce</h2>
+        <p>Oppure clicca per sceglierle. Esportale dalla tua DAW così:</p>
+        <ol class="guide">
+          <li>una traccia per strumento, in WAV;</li>
+          <li>tutte dall'inizio del brano, anche se lo strumento entra dopo;</li>
+          <li>senza effetti né volumi di mix, e senza master;</li>
+          <li>con nomi chiari, come "voce", "cassa", "chitarra sx": il tipo viene riconosciuto dal nome.</li>
+        </ol>
       </div>
     </label>
+    <input type="file" id="files" multiple accept="audio/*,.wav,.flac,.mp3,.m4a,.ogg,.aif,.aiff" class="hidden">
 
-    <div id="results" class="hidden results">
-      <section class="panel hero">
-        <div class="readout">
-          <div id="bigNums"></div>
-          <div class="chips" id="chips"></div>
+    <section class="panel hidden" id="tracksPanel">
+      <div class="tracks-head">
+        <h2>Tracce, <span id="count" class="muted"></span></h2>
+        <div class="acts">
+          <label class="ghost">Aggiungi tracce<input type="file" multiple accept="audio/*,.wav,.flac,.mp3,.m4a,.ogg,.aif,.aiff" onchange="document.getElementById('files').dispatchEvent(new CustomEvent('more',{detail:this.files}));this.value=''"></label>
+          <button class="ghost" id="clearAll">Svuota</button>
         </div>
-        <div class="meter" id="meter"></div>
-        <div class="ticks" id="ticks"></div>
-      </section>
+      </div>
+      <p class="warn hidden" id="lenWarn">Le tracce hanno durate diverse: controlla di averle esportate tutte dall'inizio del brano, altrimenti non saranno a tempo.</p>
+      <div id="tracks"></div>
+    </section>
 
-      <section class="panel">
-        <div class="spec-head"><h2>Timbro</h2><div class="legend" id="legend"></div></div>
-        <canvas id="spec" aria-label="Spettro in terzi d'ottava"></canvas>
-        <p class="spec-note" id="specNote"></p>
-      </section>
-
-      <section class="panel hidden fixlog-panel" id="fixPanel">
-        <h2>Ultima correzione</h2>
-        <div class="fixlog" id="fixNote"></div>
-        <p class="tip">Per capire cosa fa un modulo: cambia un'impostazione, correggi di nuovo e confronta Precedente con Corretto.</p>
-      </section>
-
-      <section class="panel">
-        <h2>Cosa sistemare</h2>
-        <ul class="issues" id="issues"></ul>
-      </section>
-      <section class="panel">
-        <h2>Controlli</h2>
-        <div class="scroll"><table id="checks"></table></div>
-      </section>
-    </div>
+    <section class="panel hero hidden" id="resultPanel">
+      <div class="readout">
+        <div><div class="lufs num" id="outLufs"></div><div class="lufs-cap" id="outCap"></div></div>
+        <div class="chips" id="outChips"></div>
+      </div>
+      <div class="dls">
+        <button class="save" id="dlMaster">Scarica il master</button>
+        <button class="save" id="dlMix">Scarica il mix senza master</button>
+        <button class="save" id="dlStems">Scarica le tracce elaborate</button>
+      </div>
+      <p class="hint" style="margin-bottom:16px">Il mix senza master ha 6 dB di margine: è quello da portare nel Banco di mastering per rifinirlo.</p>
+      <ul class="log" id="log"></ul>
+    </section>
 
     <div class="transport hidden" id="listen">
-      <button class="play" id="btnPlay" aria-label="Ascolta">Ascolta</button>
+      <button class="play" id="btnPlay" aria-label="Ascolta"></button>
       <div class="seg" role="group" aria-label="Versione da ascoltare">
-        <button id="selA" aria-pressed="false">Originale</button>
-        <button id="selP" aria-pressed="false" disabled>Precedente</button>
-        <button id="selB" aria-pressed="true">Corretto</button>
+        <button id="selA" aria-pressed="false">Tracce grezze</button>
+        <button id="selB" aria-pressed="true">Mix</button>
       </div>
       <div class="pos"><input type="range" id="posR" min="0" max="100" step="0.1" value="0" aria-label="Posizione"><span id="posT" class="num">0:00</span></div>
-      <label class="tog small"><input type="checkbox" id="live" checked><span class="sw"></span>Anteprima dal vivo</label>
       <label class="tog small"><input type="checkbox" id="match" checked><span class="sw"></span>Volume pareggiato</label>
-      <span class="tr-note" id="liveNote" aria-live="polite"></span>
-      <button class="save" id="btnSave" disabled>Salva WAV</button>
-      <span class="tr-note" id="saveNote"></span>
     </div>
   </main>
 </div>
 <script>
-
 (() => {
 "use strict";
 const $ = s => document.querySelector(s);
@@ -348,19 +344,11 @@ const tick = () => new Promise(r => setTimeout(r, 0));
 const dbToLin = d => Math.pow(10, d / 20);
 const linToDb = v => 20 * Math.log10(Math.max(v, 1e-12));
 const nf = {};
-function f(v, d = 1) {
-  if (v === undefined || v === null || !isFinite(v)) return "—";
-  nf[d] = nf[d] || new Intl.NumberFormat("it-IT", { minimumFractionDigits: d, maximumFractionDigits: d });
-  return nf[d].format(v).replace("-", "−");
-}
+function f(v, d = 1) { if (v === undefined || v === null || !isFinite(v)) return "—"; nf[d] = nf[d] || new Intl.NumberFormat("it-IT", { minimumFractionDigits: d, maximumFractionDigits: d }); return nf[d].format(v).replace("-", "−"); }
+const fmtTime = s => { s = Math.max(0, s); return `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`; };
+function setStatus(m, busy = false) { const s = $("#status"); s.textContent = m; s.classList.toggle("busy", busy); }
 let actx = null;
 const ctx = () => actx || (actx = new (window.AudioContext || window.webkitAudioContext)());
-
-const state = { track: null, ref: null, proc: null, trackA: null, refA: null, procA: null, base: "brano", trimStart: 0, gr: 0 };
-
-let QUIET = false;
-function setStatus(msg, busy = false) { if (QUIET) return; const s = $("#status"); s.textContent = msg; s.classList.toggle("busy", busy); }
-
 /* ---------- DSP base ---------- */
 function biquad(x, b, a) {
   const y = new Float32Array(x.length);
@@ -511,254 +499,6 @@ function wideBands(db) {
   });
 }
 
-/* ---------- Analisi ---------- */
-async function analyze(buf, label) {
-  const { sr, ch } = buf, n = ch[0].length;
-  setStatus(`Analizzo ${label}: loudness…`, true); await tick();
-  const ld = loudness(buf);
-  setStatus(`Analizzo ${label}: picchi…`, true); await tick();
-  const pk = peaks(ch);
-  setStatus(`Analizzo ${label}: stereo e timbro…`, true); await tick();
-  const dcv = Math.max(...ch.map(x => { let s = 0; for (let i = 0; i < x.length; i++) s += x[i]; return Math.abs(s / x.length); }));
-  const c = corr(ch[0], ch[1]);
-  const lowC = corr(lr4(ch[0], "lp", 150, sr), lr4(ch[1], "lp", 150, sr));
-  await tick();
-  const spec = spectrum(buf);
-  let a = 0; while (a < n && Math.abs(ch[0][a]) < 0.001 && Math.abs(ch[1][a]) < 0.001) a++;
-  const tl = Math.min(n, Math.round(sr * 0.05));
-  const tail = Math.max(...ch.map(x => { let s = 0; for (let i = n - tl; i < n; i++) s += x[i] * x[i]; return linToDb(Math.sqrt(s / tl)); }));
-  const tp = linToDb(pk.tp);
-  return {
-    I: ld.I, LRA: ld.LRA, sp: linToDb(pk.sp), tp, plr: tp - ld.I,
-    clip: clipRuns(ch, pk.sp), dc: linToDb(dcv), corr: c, lowCorr: lowC,
-    lead: a / sr, tail, dur: n / sr, spec, wide: wideBands(spec)
-  };
-}
-
-/* ---------- Caricamento ---------- */
-async function loadFile(file, which) {
-  if (!file) return;
-  setStatus(`Apro ${file.name}…`, true); await tick();
-  let ab;
-  try { ab = await ctx().decodeAudioData(await file.arrayBuffer()); }
-  catch (e) { setStatus(`${file.name} non si apre nel browser. Esportalo in WAV o MP3 e riprova.`); return; }
-  const L = ab.getChannelData(0).slice(), R = ab.numberOfChannels > 1 ? ab.getChannelData(1).slice() : L.slice();
-  const buf = { sr: ab.sampleRate, ch: [L, R] };
-  const drop = which === "track" ? $("#dropTrack") : $("#dropRef");
-  drop.classList.add("loaded");
-  (which === "track" ? $("#nameTrack") : $("#nameRef")).textContent = `${file.name} (${fmtTime(ab.duration)})`;
-  (which === "track" ? $("#hintTrack") : $("#hintRef")).classList.add("hidden");
-  if (which === "track") {
-    state.track = buf; state.base = file.name.replace(/\.[^.]+$/, "").replace(/[^\w\- ]+/g, "").trim() || "brano";
-    state.proc = null; state.procA = null; state.prev = null; state.prevA = null; $("#selP").disabled = true; stopPlay();
-    $("#fixPanel").classList.add("hidden"); $("#btnSave").disabled = true;
-    state.trackA = await analyze(buf, "il tuo brano");
-    initLive(); $("#listen").classList.remove("hidden"); pl.off = 0; pl.bufFor = null; labels(); updatePos(); select("B");
-  } else {
-    state.ref = buf;
-    state.refA = await analyze(buf, "il riferimento");
-    $("#target option[value=ref]").disabled = false;
-    LIVE.plan = null; LIVE.firKey = ""; LIVE.win = null; if (state.track) scheduleLive();
-  }
-  setStatus("");
-  render();
-}
-function wireDrop(dropId, inputId, which) {
-  const d = $(dropId), inp = $(inputId);
-  inp.addEventListener("change", () => loadFile(inp.files[0], which));
-  d.addEventListener("dragover", e => { e.preventDefault(); d.classList.add("over"); });
-  d.addEventListener("dragleave", () => d.classList.remove("over"));
-  d.addEventListener("drop", e => { e.preventDefault(); d.classList.remove("over"); loadFile(e.dataTransfer.files[0], which); });
-}
-wireDrop("#dropTrack", "#fileTrack", "track");
-wireDrop("#dropRef", "#fileRef", "ref");
-{ const em = $("#empty");
-  em.addEventListener("dragover", e => { e.preventDefault(); em.classList.add("over"); });
-  em.addEventListener("dragleave", () => em.classList.remove("over"));
-  em.addEventListener("drop", e => { e.preventDefault(); em.classList.remove("over"); loadFile(e.dataTransfer.files[0], "track"); }); }
-const ICON_PLAY = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>';
-const ICON_PAUSE = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4.5" width="4" height="15" rx="1"/><rect x="14" y="4.5" width="4" height="15" rx="1"/></svg>';
-function playIcon(on) { const b = $("#btnPlay"); if (!b) return; b.innerHTML = on ? ICON_PAUSE : ICON_PLAY; b.setAttribute("aria-label", on ? "Pausa" : "Ascolta"); }
-playIcon(false);
-function fmtTime(s) { s = Math.max(0, s); const m = Math.floor(s / 60), r = Math.floor(s % 60); return `${m}:${String(r).padStart(2, "0")}`; }
-
-/* ---------- Valutazioni ---------- */
-function target() {
-  const v = $("#target").value, ceil = parseFloat($("#ceil").value);
-  const I = v === "ref" && state.refA ? Math.round(state.refA.I * 10) / 10 : parseFloat(v === "ref" ? -14 : v);
-  return { I, ceil };
-}
-function tonalDev(a) {
-  if (!state.refA) return null;
-  return a.wide.map((v, i) => v - state.refA.wide[i]);
-}
-const ROWS = [
-  { label: "Loudness integrata", desc: "Volume percepito medio del brano.", val: a => `${f(a.I)} LUFS`,
-    st: (a, t) => { const d = Math.abs(a.I - t.I); return d <= 1 ? "ok" : d <= 3 ? "warn" : "bad"; } },
-  { label: "True peak", desc: "Picco reale dopo la conversione, anche tra i campioni.", val: a => `${f(a.tp)} dBTP`,
-    st: (a, t) => a.tp <= t.ceil + 0.05 ? "ok" : a.tp <= 0 ? "warn" : "bad" },
-  { label: "Rapporto picco/loudness (PLR)", desc: "Quanta dinamica resta tra picchi e volume medio.", val: a => `${f(a.plr)} dB`,
-    st: a => a.plr >= 9 ? "ok" : a.plr >= 7 ? "warn" : "bad" },
-  { label: "Loudness range", desc: "Quanto varia il volume tra le parti del brano.", val: a => `${f(a.LRA)} LU`,
-    st: a => a.LRA >= 3 && a.LRA <= 15 ? "ok" : "warn" },
-  { label: "Tratti in clipping", desc: "Campioni piatti a fondo scala, cioè distorsione.", val: a => `${a.clip}`,
-    st: a => a.clip === 0 ? "ok" : a.clip <= 10 ? "warn" : "bad" },
-  { label: "DC offset", desc: "Spostamento della forma d'onda rispetto allo zero.", val: a => `${f(a.dc)} dB`,
-    st: a => a.dc < -60 ? "ok" : a.dc < -45 ? "warn" : "bad" },
-  { label: "Correlazione stereo", desc: "1 è mono, verso 0 è molto largo, sotto 0 c'è un problema di fase.", val: a => f(a.corr, 2),
-    st: a => a.corr > 0.2 ? "ok" : a.corr >= 0 ? "warn" : "bad" },
-  { label: "Bassi in mono (sotto 150 Hz)", desc: "I bassi dovrebbero essere quasi mono (vicino a 1).", val: a => f(a.lowCorr, 2),
-    st: a => a.lowCorr >= 0.85 ? "ok" : a.lowCorr >= 0.6 ? "warn" : "bad" },
-  { label: "Bilanciamento tonale", desc: "Scarto massimo dal riferimento in una fascia di frequenze.", needRef: true,
-    val: a => { const d = tonalDev(a); return d ? `±${f(Math.max(...d.map(Math.abs)))} dB` : "—"; },
-    st: a => { const d = tonalDev(a); if (!d) return null; const m = Math.max(...d.map(Math.abs)); return m <= 2 ? "ok" : m <= 4 ? "warn" : "bad"; } },
-  { label: "Silenzio iniziale", desc: "Tempo prima che parta il suono.", val: a => `${f(a.lead, 2)} s`,
-    st: a => a.lead <= 0.3 ? "ok" : "warn" },
-  { label: "Finale", desc: "Livello degli ultimi 50 ms: se è alto il brano finisce di colpo.", val: a => `${f(a.tail)} dB`,
-    st: a => a.tail <= -40 ? "ok" : "warn" },
-];
-const BADGE = { ok: "ok", warn: "rivedi", bad: "problema" };
-
-function issues(a) {
-  const t = target(), out = [], dI = a.I - t.I;
-  if (dI < -1) out.push(["fix", `Il volume percepito è ${f(-dI)} dB sotto il target: si alza con guadagno e limiter.`]);
-  if (dI > 1) out.push(["fix", `Il volume percepito è ${f(dI)} dB sopra il target: si abbassa senza problemi.`]);
-  if (a.tp > t.ceil + 0.05) out.push(["fix", `Il true peak arriva a ${f(a.tp)} dBTP: nella conversione in MP3 o AAC può distorcere. Il limiter lo porta sotto ${f(t.ceil)} dBTP.`]);
-  if (a.clip > 0) out.push(["mix", `Ci sono ${a.clip} tratti in clipping. La distorsione è già nel file: riesporta il mix lasciando qualche dB di margine sul master.`]);
-  if (a.plr < 7) out.push(["mix", `Il brano è già molto compresso (PLR ${f(a.plr)} dB). La dinamica persa non si recupera: se puoi, parti da un mix meno limitato.`]);
-  if (dI < -1 && t.ceil - t.I < 8) out.push(["info", `Con questo target il PLR scenderà a circa ${f(t.ceil - t.I)} dB: il brano suonerà più forte ma meno dinamico. Valuta un target più basso se perde impatto.`]);
-  if (a.LRA > 15) out.push(["info", `Il volume varia molto tra le parti del brano (LRA ${f(a.LRA)} LU): o non è ancora masterizzato, o è una scelta voluta.`]);
-  if (a.dc >= -60) out.push(["fix", `C'è un DC offset di ${f(a.dc)} dB: si elimina con un filtro sotto i 10 Hz.`]);
-  if (a.corr < 0) out.push(["mix", `La correlazione stereo è negativa: probabile problema di fase tra i canali, in mono il brano perderebbe corpo. Va controllato nel mix.`]);
-  if (a.lowCorr < 0.85) out.push(["fix", `I bassi hanno una componente stereo (correlazione ${f(a.lowCorr, 2)}): si possono rendere mono nella fascia più bassa.`]);
-  const d = tonalDev(a);
-  if (d) {
-    const ranked = d.map((v, i) => [v, WIDE[i][0]]).filter(x => Math.abs(x[0]) > 2).sort((x, y) => Math.abs(y[0]) - Math.abs(x[0])).slice(0, 3);
-    if (ranked.length) out.push(["fix", `Rispetto al riferimento: ${ranked.map(([v, n]) => `${v > 0 ? "+" : ""}${f(v)} dB in ${n.toLowerCase()}`).join(", ")}. L'EQ di confronto lo avvicina; se lo scarto è grande, conviene rivedere anche il mix.`]);
-  } else out.push(["info", "Carica un brano di riferimento per confrontare il timbro e usare l'EQ di confronto."]);
-  if (a.lead > 0.3) out.push(["fix", `Il suono parte dopo ${f(a.lead, 2)} s di silenzio: si può rifilare.`]);
-  if (a.tail > -40) out.push(["fix", "Il brano finisce di colpo: un micro-fade evita il click finale."]);
-  return out;
-}
-
-/* ---------- Rendering ---------- */
-const pct = v => Math.max(0, Math.min(100, (v + 24) / 20 * 100));
-function render() {
-  if (!state.trackA) return;
-  $("#results").classList.remove("hidden");
-  const t = target(), a = state.trackA, p = state.procA, r = state.refA;
-
-  $("#empty").classList.add("hidden");
-  const cur = p || a;
-  $("#bigNums").innerHTML = `<div class="lufs num">${f(cur.I)}<small>LUFS</small></div><div class="lufs-cap">${p ? "Versione corretta" : "Il tuo brano"}, loudness integrata</div>`;
-  const chips = [[f(t.I), "Target, LUFS"]];
-  if (p) chips.push([f(a.I), "Originale, LUFS"]);
-  if (r) chips.push([f(r.I), "Riferimento, LUFS"]);
-  chips.push([f(cur.tp), "True peak, dBTP"], [f(cur.plr), "PLR, dB"]);
-  $("#chips").innerHTML = chips.map(([v, l]) => `<div class="chip"><b class="num">${v}</b><span>${l}</span></div>`).join("");
-  let m = `<div class="fill" style="width:${state.meterW || 0}%"></div>`;
-  m += `<div class="zone" style="left:${pct(t.I - 1)}%;width:${pct(t.I + 1) - pct(t.I - 1)}%" title="Target ±1 LU"></div>`;
-  m += `<div class="mk up" style="left:${pct(a.I)}%;--c:var(--s4)"><span>${p ? "Originale" : "Tuo brano"}</span></div>`;
-  if (p) m += `<div class="mk down" style="left:${pct(p.I)}%;--c:var(--s3)"><span>Corretto</span></div>`;
-  if (r) m += `<div class="mk ${p ? "up" : "down"}" style="left:${pct(r.I)}%;--c:var(--ink)"><span>Riferimento</span></div>`;
-  $("#meter").innerHTML = m;
-  const newW = pct(cur.I); state.meterW = newW;
-  requestAnimationFrame(() => requestAnimationFrame(() => { const fl = $("#meter .fill"); if (fl) fl.style.width = newW + "%"; }));
-  let tk = ""; for (let v = -24; v <= -4; v += 2) tk += `<span style="left:${pct(v)}%">${v % 4 === 0 ? f(v, 0) : "·"}</span>`;
-  $("#ticks").innerHTML = tk;
-
-  // tabella
-  const cols = [["Tuo brano", a, true]]; if (p) cols.push(["Corretto", p, true]); if (r) cols.push(["Riferimento", r, false]);
-  let h = `<thead><tr><th>Controllo</th>${cols.map(c => `<th>${c[0]}</th>`).join("")}</tr></thead><tbody>`;
-  for (const row of ROWS) {
-    if (row.needRef && !r) continue;
-    h += `<tr><td class="label"><b>${row.label}</b><small>${row.desc}</small></td>`;
-    for (const [name, x, judge] of cols) {
-      if (row.needRef && name === "Riferimento") { h += `<td class="val muted">—</td>`; continue; }
-      const s = judge ? row.st(x, t) : null;
-      h += `<td class="val">${row.val(x)}${s ? `<span class="badge ${s}">${BADGE[s]}</span>` : ""}</td>`;
-    }
-    h += "</tr>";
-  }
-  $("#checks").innerHTML = h + "</tbody>";
-
-  // problemi
-  const tags = { fix: "Correggibile qui", mix: "Da sistemare nel mix", info: "Da valutare" };
-  const list = issues(a);
-  $("#issues").innerHTML = list.length
-    ? list.map(([k, txt]) => `<li class="${k}"><em>${tags[k]}</em>${txt}</li>`).join("")
-    : `<li class="fix"><em>Tutto in ordine</em>Nessun problema tecnico evidente. Il resto lo decide il tuo orecchio.</li>`;
-
-  // opzioni legate al riferimento
-  const hasRef = !!r;
-  document.querySelectorAll(".needs-ref").forEach(el => { el.classList.toggle("disabled", !hasRef); el.querySelectorAll("input").forEach(x => x.disabled = !hasRef); });
-  $("#refHint").classList.toggle("hidden", hasRef);
-
-  drawSpectrum();
-  $("#specNote").textContent = r ? "Curve normalizzate: conta la forma, non il volume. Dove la tua curva sta sopra quella del riferimento, quella fascia è più presente." : "Carica un riferimento per sovrapporre la sua curva.";
-}
-
-function cssVar(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
-function drawSpectrum() {
-  if (!state.trackA) return;
-  const cv = $("#spec"), dpr = window.devicePixelRatio || 1, W = cv.clientWidth, H = cv.clientHeight;
-  if (!W) return;
-  cv.width = W * dpr; cv.height = H * dpr;
-  const g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
-  const main = state.procA ? state.procA.spec : state.trackA.spec, all = [state.trackA.spec];
-  if (state.procA) all.push(state.procA.spec); if (state.refA) all.push(state.refA.spec);
-  let mx = -Infinity, mn = Infinity;
-  all.forEach(s => s.forEach((v, i) => { if (CENTERS[i] >= 25 && CENTERS[i] <= 16500) { mx = Math.max(mx, v); mn = Math.min(mn, v); } }));
-  mx = Math.ceil(mx / 6) * 6; mn = Math.max(mx - 42, Math.floor(mn / 6) * 6);
-  const pl = 34, pr = 6, pt = 30, pb = 24;
-  const x = fr => pl + (Math.log10(fr / 20) / Math.log10(1000)) * (W - pl - pr);
-  const y = v => pt + (mx - v) / (mx - mn) * (H - pt - pb);
-  const muted = cssVar("--muted"), line = cssVar("--line"), ink = cssVar("--ink");
-  g.font = "12px 'Instrument Sans', sans-serif"; g.lineWidth = 1;
-  // fasce
-  WIDE.forEach(([name, lo, hi], i) => {
-    const a = x(Math.max(lo, 20)), b = x(Math.min(hi, 20000));
-    if (i) { g.strokeStyle = line; g.setLineDash([2, 4]); g.beginPath(); g.moveTo(a, 8); g.lineTo(a, H - pb); g.stroke(); g.setLineDash([]); }
-    g.fillStyle = muted; g.textAlign = "center"; if (b - a > 34) g.fillText(name, (a + b) / 2, 16);
-  });
-  g.strokeStyle = line;
-  for (let v = mx; v >= mn; v -= 6) { g.beginPath(); g.moveTo(pl, y(v)); g.lineTo(W - pr, y(v)); g.stroke(); g.fillStyle = muted; g.textAlign = "right"; g.fillText(f(v, 0), pl - 6, y(v) + 4); }
-  g.textAlign = "center";
-  [50, 100, 200, 500, 1000, 2000, 5000, 10000].forEach(fr => g.fillText(fr >= 1000 ? `${fr / 1000}k` : `${fr}`, x(fr), H - 6));
-  const grad = g.createLinearGradient(x(20), 0, x(20000), 0);
-  ["--s1", "--s2", "--s3", "--s4", "--s5"].forEach((c, i) => grad.addColorStop(i / 4, cssVar(c)));
-  const pts = s => s.map((v, i) => [x(CENTERS[i]), y(Math.max(v, mn))]);
-  const pathOf = s => { const p = new Path2D(); pts(s).forEach(([px, py], i) => i ? p.lineTo(px, py) : p.moveTo(px, py)); return p; };
-  // area sfumata sotto la curva principale
-  const P = pts(main), area = new Path2D();
-  P.forEach(([px, py], i) => i ? area.lineTo(px, py) : area.moveTo(px, py));
-  area.lineTo(P[P.length - 1][0], H - pb); area.lineTo(P[0][0], H - pb); area.closePath();
-  const off = document.createElement("canvas"); off.width = cv.width; off.height = cv.height;
-  const o = off.getContext("2d"); o.setTransform(dpr, 0, 0, dpr, 0, 0);
-  o.fillStyle = grad; o.fill(area);
-  o.globalCompositeOperation = "destination-in";
-  const vg = o.createLinearGradient(0, pt, 0, H - pb), fa = parseFloat(cssVar("--fill-a")) || 0.4;
-  vg.addColorStop(0, `rgba(0,0,0,${fa})`); vg.addColorStop(1, "rgba(0,0,0,0.02)");
-  o.fillStyle = vg; o.fillRect(0, 0, W, H);
-  g.drawImage(off, 0, 0, W, H);
-  if (state.procA) { g.strokeStyle = muted; g.lineWidth = 1.5; g.stroke(pathOf(state.trackA.spec)); }
-  if (state.refA) { g.strokeStyle = ink; g.lineWidth = 1.8; g.setLineDash([6, 5]); g.stroke(pathOf(state.refA.spec)); g.setLineDash([]); }
-  g.strokeStyle = grad; g.lineWidth = 3; g.lineJoin = "round"; g.stroke(pathOf(main));
-  const lg = [[`class="grad"`, state.procA ? "Corretto" : "Tuo brano"]];
-  if (state.procA) lg.push([`style="--c:var(--muted)"`, "Originale"]);
-  if (state.refA) lg.push([`class="dash" style="--c:var(--ink)"`, "Riferimento"]);
-  $("#legend").innerHTML = lg.map(([a, t]) => `<span ${a}>${t}</span>`).join("");
-}
-window.addEventListener("resize", () => drawSpectrum());
-matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", () => drawSpectrum());
-$("#target").addEventListener("change", render);
-$("#ceil").addEventListener("change", render);
-document.querySelectorAll("input[type=range][data-unit]").forEach(el => {
-  const out = document.querySelector(`[data-for="${el.id}"]`);
-  const upd = () => { out.textContent = f(parseFloat(el.value), parseInt(el.dataset.dec || "0")) + el.dataset.unit; };
-  el.addEventListener("input", upd); upd();
-});
-
 /* ---------- Correzioni ---------- */
 function removeDC(ch, sr) {
   const hp = rbj("hp", 10, sr);
@@ -834,15 +574,23 @@ function limit(ch, sr, gain, ceil) {
   return { ch: [oL, oR], gr: -linToDb(minG) };
 }
 async function toTarget(ch, sr, tI, tTP) {
-  let gainDb = Math.min(30, tI - loudness({ sr, ch }).I), ceilDb = tTP - 0.3, res = null;
-  for (let it = 0; it < 6; it++) {
+  let gainDb = Math.min(30, tI - loudness({ sr, ch }).I), ceilDb = tTP - 0.3, res = null, prev = null, hist = [];
+  for (let it = 0; it < 10; it++) {
     setStatus(`Limiter, passaggio ${it + 1}…`, true); await tick();
     res = limit(ch, sr, dbToLin(gainDb), dbToLin(ceilDb));
     const I = loudness({ sr, ch: res.ch }).I, tp = linToDb(peaks(res.ch).tp);
-    let ok = true;
-    if (tp > tTP) { ceilDb -= (tp - tTP) + 0.05; ok = false; }
-    if (Math.abs(I - tI) > 0.2) { gainDb = Math.min(30, gainDb + (tI - I)); ok = false; }
-    if (ok) break;
+    hist.push({ g: gainDb, I, gr: res.gr });
+    if (tp > tTP) { ceilDb -= (tp - tTP) + 0.05; continue; }
+    if (Math.abs(I - tI) <= 0.2) break;
+    let slope = 1;
+    if (prev && Math.abs(gainDb - prev.g) > 0.05) slope = (I - prev.I) / (gainDb - prev.g);
+    if (I < tI && prev && slope < 0.25) { // il limiter non riesce più ad alzare il volume: mi fermo prima di schiacciare
+      const best = Math.max(...hist.map(h => h.I)), pick = hist.filter(h => h.I >= best - 0.3).sort((a, b) => a.g - b.g)[0];
+      res = limit(ch, sr, dbToLin(pick.g), dbToLin(ceilDb)); res.reached = loudness({ sr, ch: res.ch }).I; res.capped = true;
+      return res;
+    }
+    prev = { g: gainDb, I };
+    gainDb = Math.min(36, gainDb + (tI - I) / Math.max(0.3, Math.min(1, slope)));
   }
   return res;
 }
@@ -1012,288 +760,6 @@ function envShaper(ch, sr, atkDb, susDb, info) {
   return [oL, oR];
 }
 
-$("#btnFix").addEventListener("click", async () => {
-  if (!state.track) return;
-  const btn = $("#btnFix"); btn.disabled = true; stopPlay();
-  try {
-    const sr = state.track.sr, t = target(), info = [], hasRef = !!state.refA;
-    let ch = [state.track.ch[0].slice(), state.track.ch[1].slice()];
-    if ($("#oDc").checked) { setStatus("Rimuovo il DC offset…", true); await tick(); ch = removeDC(ch, sr); }
-    if ($("#oEq").checked && hasRef) {
-      setStatus("Calcolo l'EQ di confronto…", true); await tick();
-      const curve = matchCurve(state.trackA.spec, state.refA.spec, $("#eqStr").value / 100);
-      ch = await convolveStereo(ch[0], ch[1], firFromCurve(curve, sr));
-    }
-    const mono = $("#oMono").checked;
-    if (mono) { setStatus("Metto i bassi in mono…", true); await tick(); ch = monoBass(ch, sr, parseFloat($("#monoF").value)); }
-    const mb = hasRef && $("#oMb").checked ? $("#mbStr").value / 100 : 0;
-    const w = hasRef && $("#oW").checked ? $("#wStr").value / 100 : 0;
-    if (mb || w) ch = await multiStage(ch, sr, mb, w, mono, info);
-    if ($("#oGlue").checked) { setStatus("Glue compressor…", true); await tick(); ch = glue(ch, sr, parseFloat($("#glueAmt").value), info); }
-    const envA = +$("#envAtk").value, envS = +$("#envSus").value;
-    if ($("#oEnv").checked && (envA || envS)) { setStatus("Envelope shaper…", true); await tick(); ch = envShaper(ch, sr, envA, envS, info); }
-    if ($("#oSat").checked && +$("#satAmt").value > 0) { setStatus("Saturazione…", true); await tick(); ch = saturate(ch, $("#satAmt").value / 100, info); }
-    let gr = 0;
-    if ($("#oLoud").checked) { const r = await toTarget(ch, sr, t.I, t.ceil); ch = r.ch; gr = r.gr; }
-    let trimStart = 0;
-    if ($("#oTrim").checked) { const r = trim(ch, sr); ch = r.ch; trimStart = r.start; }
-    const procA = await analyze({ sr, ch }, "la versione corretta");
-    if (state.proc) { state.prev = state.proc; state.prevA = state.procA; state.prevTrim = state.trimStart; }
-    state.proc = { sr, ch }; state.procA = procA; state.trimStart = trimStart; state.gr = gr; state.procVer = (state.procVer || 0) + 1;
-    $("#btnSave").disabled = false;
-    setStatus("Correzione completata.");
-    let note = `Pronto: ${f(procA.I)} LUFS, true peak ${f(procA.tp)} dBTP.`;
-    if (gr > 0.1) note += ` Il limiter ha ridotto al massimo di ${f(gr)} dB${gr > 6 ? ": è tanto, se il brano perde impatto prova un target più basso" : ""}.`;
-    $("#fixNote").innerHTML = [note, ...info].map(x => `<span style="display:block">${x}</span>`).join("");
-    $("#listen").classList.remove("hidden"); $("#fixPanel").classList.remove("hidden"); pl.bufFor = null; labels();
-    render();
-  } catch (e) {
-    setStatus("La correzione si è interrotta: il file potrebbe essere troppo lungo per la memoria del browser. Prova con un brano più corto o chiudi altre schede.");
-  } finally { btn.disabled = false; }
-});
-
-/* ---------- Anteprima dal vivo ---------- */
-// Rielabora solo ~20 secondi attorno al punto d'ascolto con la stessa catena della correzione completa.
-// Le grandezze che dipendono dal brano intero (soglie, picco, volume) vengono prese dal brano originale
-// e spostate di quanto il tratto elaborato differisce dallo stesso tratto originale.
-const LIVE = { plan: null, planFor: null, busy: false, again: false, win: null, fir: null, firKey: "", glueThr: {}, timer: 0 };
-const WIN = 20, PRE = 1.0;
-function winLoud(ch, sr) { const I = loudness({ sr, ch }).I; return isFinite(I) ? I : -70; }
-async function ensurePlan() {
-  const key = state.track && (state.track.ch[0].length + ":" + (state.ref ? state.ref.ch[0].length : 0));
-  if (LIVE.plan && LIVE.planFor === key) return LIVE.plan;
-  const { sr, ch } = state.track, n = ch[0].length;
-  QUIET = true;
-  const plan = { dc: ch.map(x => { let s = 0; for (let i = 0; i < n; i++) s += x[i]; return s / n; }) };
-  let p = 0; for (const x of ch) for (let i = 0; i < n; i++) { const v = Math.abs(x[i]); if (v > p) p = v; }
-  plan.peak = p; plan.I = state.trackA.I;
-  $("#liveNote").textContent = "Preparo l'anteprima…"; await tick();
-  plan.glueDet = detector(ch[0], ch[1], sr, 10, 90);
-  if (state.ref) {
-    const rb = await refBands(); await tick();
-    const bl = split4(ch[0], sr); await tick(); const br = split4(ch[1], sr);
-    plan.bands = bl.map((b, i) => bandStats(b, br[i], sr)); plan.ref = rb;
-  }
-  QUIET = false;
-  LIVE.plan = plan; LIVE.planFor = key; LIVE.glueThr = {};
-  return plan;
-}
-function glueThrFor(target) {
-  if (LIVE.glueThr[target] !== undefined) return LIVE.glueThr[target];
-  const det = LIVE.plan.glueDet, sr = state.track.sr, samp = [];
-  for (let i = 0; i < det.length; i += 32) if (det[i] > -60) samp.push(det[i]);
-  let lo = -70, hi = 0;
-  for (let it = 0; it < 30; it++) { const mid = (lo + hi) / 2; let s = 0; for (const v of samp) s += staticGR(v - mid, 2, 6); if (s / samp.length > target) lo = mid; else hi = mid; }
-  let thr = (lo + hi) / 2;
-  for (let it = 0; it < 5; it++) {
-    const gr = smoothGR(det, sr, thr, 2, 6, 30, 300); let s = 0, c = 0;
-    for (let i = 0; i < det.length; i += 32) if (det[i] > -60) { s += gr[i]; c++; }
-    const avg = s / Math.max(1, c); if (Math.abs(avg - target) < 0.1) break; thr += (avg - target) * 1.6;
-  }
-  return LIVE.glueThr[target] = thr;
-}
-function firFor(str) {
-  const key = str + ":" + state.track.sr;
-  if (LIVE.firKey !== key) { LIVE.fir = firFromCurve(matchCurve(state.trackA.spec, state.refA.spec, str), state.track.sr); LIVE.firKey = key; }
-  return LIVE.fir;
-}
-async function renderWindow(center) {
-  const plan = await ensurePlan(), { sr } = state.track, src = state.track.ch, n = src[0].length;
-  const a = Math.max(0, Math.round((center - 1.5) * sr)), b = Math.min(n, a + Math.round(WIN * sr)), a0 = Math.max(0, a - Math.round(PRE * sr));
-  const orig = src.map(x => x.slice(a0, b)), Lo = winLoud(orig, sr);
-  const shiftOf = ch => winLoud(ch, sr) - Lo;
-  const hasRef = !!state.refA, t = target();
-  let ch = orig.map(x => x.slice());
-  if ($("#oDc").checked) { const hp = rbj("hp", 10, sr); ch = ch.map((x, c) => { const y = new Float32Array(x.length); for (let i = 0; i < x.length; i++) y[i] = x[i] - plan.dc[c]; return filt(y, hp); }); }
-  if ($("#oEq").checked && hasRef) ch = await convolveStereo(ch[0], ch[1], firFor($("#eqStr").value / 100));
-  const mono = $("#oMono").checked;
-  if (mono) ch = monoBass(ch, sr, parseFloat($("#monoF").value));
-  const mb = hasRef && $("#oMb").checked ? $("#mbStr").value / 100 : 0, w = hasRef && $("#oW").checked ? $("#wStr").value / 100 : 0;
-  if ((mb || w) && plan.bands) ch = multiWindow(ch, orig, sr, mb, w, mono, plan);
-  if ($("#oGlue").checked) {
-    const thr = glueThrFor(parseFloat($("#glueAmt").value)) + shiftOf(ch);
-    const det = detector(ch[0], ch[1], sr, 10, 90), gr = smoothGR(det, sr, thr, 2, 6, 30, 300);
-    ch = ch.map(x => x.slice()); gainByGR(ch[0], ch[1], gr);
-  }
-  const envA = +$("#envAtk").value, envS = +$("#envSus").value;
-  if ($("#oEnv") && $("#oEnv").checked && (envA || envS)) ch = envShaper(ch, sr, envA, envS, []);
-  if ($("#oSat").checked && +$("#satAmt").value > 0) ch = satWithPeak(ch, $("#satAmt").value / 100, plan.peak * dbToLin(shiftOf(ch)));
-  if ($("#oLoud").checked) { const r = await toTarget(ch, sr, t.I - (plan.I - Lo), t.ceil); ch = r.ch; }
-  const skip = a - a0, out = ch.map(x => x.subarray(skip));
-  return { a, b, out, estI: plan.I + (winLoud(out, sr) - winLoud(src.map(x => x.subarray(a, b)), sr)) };
-}
-function multiWindow(ch, orig, sr, mb, w, keepLowMono, plan) {
-  const bl = split4(ch[0], sr), br = split4(ch[1], sr), ol = split4(orig[0], sr), or = split4(orig[1], sr);
-  const times = [[30, 200], [20, 150], [10, 100], [5, 80]];
-  const rmsDb = (L, R) => { let s = 0; for (let i = 0; i < L.length; i += 4) s += L[i] * L[i] + R[i] * R[i]; return 10 * Math.log10(s / (L.length / 2) + 1e-20); };
-  for (let b = 0; b < 4; b++) {
-    const L = bl[b], R = br[b], ts = plan.bands[b], rs = plan.ref[b];
-    if (mb && ts.spread > rs.spread + 0.5 && rs.spread > 0.5) {
-      const ratio = 1 + (Math.min(4, ts.spread / rs.spread) - 1) * mb, thr = ts.p50 + (rmsDb(L, R) - rmsDb(ol[b], or[b]));
-      const det = detector(L, R, sr, 10), gr = smoothGR(det, sr, thr, ratio, 6, times[b][0], times[b][1]);
-      const before = energy(L, R); gainByGR(L, R, gr);
-      const mk = Math.sqrt(before / (energy(L, R) + 1e-20)); for (let i = 0; i < L.length; i++) { L[i] *= mk; R[i] *= mk; }
-    }
-    if (w && !(b === 0 && keepLowMono) && isFinite(ts.side) && ts.side > -60) {
-      const db = Math.max(-6, Math.min(6, rs.side - ts.side)) * w;
-      if (Math.abs(db) > 0.3) { const g = dbToLin(db); for (let i = 0; i < L.length; i++) { const m = (L[i] + R[i]) * 0.5, s = (L[i] - R[i]) * 0.5 * g; L[i] = m + s; R[i] = m - s; } }
-    }
-  }
-  const n = ch[0].length, oL = new Float32Array(n), oR = new Float32Array(n);
-  for (let b = 0; b < 4; b++) for (let i = 0; i < n; i++) { oL[i] += bl[b][i]; oR[i] += br[b][i]; }
-  return [oL, oR];
-}
-function satWithPeak(ch, amt, p) {
-  const g = 0.3 + amt * 1.7, norm = Math.tanh(g), c = TP[1];
-  if (!(p > 1e-6)) return ch;
-  const sat = v => Math.tanh(g * v / p) / norm * p;
-  return ch.map(x => {
-    const n = x.length, sO = new Float32Array(n), o = new Float32Array(n);
-    for (let i = 0; i < n; i++) { let v = x[i]; if (i >= 5 && i < n - 6) { v = 0; for (let j = 0; j < 12; j++) v += c[j] * x[i - 5 + j]; } sO[i] = sat(v); }
-    for (let i = 0; i < n; i++) { let v = sO[i]; if (i >= 6 && i < n - 5) { v = 0; for (let j = 0; j < 12; j++) v += c[j] * sO[i - 6 + j]; } o[i] = 0.5 * sat(x[i]) + 0.5 * v; }
-    return o;
-  });
-}
-function liveOn() { return $("#live").checked && !!state.track; }
-function initLive() {
-  state.live = state.track.ch.map(x => x.slice()); state.liveVer = 0; state.liveI = state.trackA.I;
-  LIVE.win = null; LIVE.plan = null;
-}
-async function updateLive(center) {
-  if (!liveOn()) return;
-  if (LIVE.busy) { LIVE.again = center; return; }
-  LIVE.busy = true; $("#liveNote").textContent = "Aggiorno l'anteprima…";
-  try {
-    const QUIET_prev = QUIET; QUIET = true;
-    const r = await renderWindow(center);
-    QUIET = QUIET_prev;
-    const sr = state.track.sr, fade = Math.round(sr * 0.05);
-    // incolla il tratto elaborato con brevi dissolvenze ai bordi
-    for (let c = 0; c < 2; c++) {
-      const dst = state.live[c], orig = state.track.ch[c], o = r.out[c];
-      for (let i = 0; i < o.length; i++) {
-        const k = Math.min(1, i / fade, (o.length - 1 - i) / fade), j = r.a + i;
-        dst[j] = r.a === 0 && i < fade ? o[i] : k * o[i] + (1 - k) * orig[j];
-      }
-    }
-    LIVE.win = { a: r.a / sr, b: r.b / sr }; state.liveI = r.estI; state.liveVer++;
-    $("#liveNote").textContent = "Anteprima aggiornata";
-    if (pl.playing && pl.which === "B") restartPlay();
-  } catch (e) { console.error(e); QUIET = false; $("#liveNote").textContent = "Anteprima non riuscita"; }
-  finally {
-    LIVE.busy = false;
-    if (LIVE.again !== false) { const c = LIVE.again; LIVE.again = false; updateLive(pl.playing ? currentPos() : c); }
-  }
-}
-function scheduleLive() {
-  if (!liveOn()) return;
-  clearTimeout(LIVE.timer);
-  LIVE.timer = setTimeout(() => updateLive(currentPos()), 280);
-}
-document.querySelectorAll(".rail .mods, .rail .fields").forEach(el => {
-  el.addEventListener("input", e => { if (e.target.type !== "file") scheduleLive(); });
-  el.addEventListener("change", e => { if (e.target.type !== "file") scheduleLive(); });
-});
-
-/* ---------- Ascolto: originale, precedente/ultima correzione, corretto/anteprima ---------- */
-const pl = { src: null, gains: null, t0: 0, off: 0, playing: false, which: "B", raf: 0, bufs: null, bufFor: null };
-function toAB(b) { const ab = ctx().createBuffer(2, b.ch[0].length, b.sr); ab.copyToChannel(b.ch[0], 0); ab.copyToChannel(b.ch[1], 1); return ab; }
-function versions() {
-  const A = { buf: state.track, I: state.trackA.I, ts: 0 };
-  if (liveOn()) {
-    const v = { A, B: { buf: { sr: state.track.sr, ch: state.live }, I: state.liveI, ts: 0 } };
-    if (state.proc) v.P = { buf: state.proc, I: state.procA.I, ts: state.trimStart };
-    return v;
-  }
-  const v = { A, B: state.proc ? { buf: state.proc, I: state.procA.I, ts: state.trimStart } : { buf: state.track, I: state.trackA.I, ts: 0 } };
-  if (state.prev) v.P = { buf: state.prev, I: state.prevA.I, ts: state.prevTrim };
-  return v;
-}
-function bufKey() { return liveOn() ? "L" + state.liveVer + "|" + (state.procVer || 0) : state.proc; }
-function levelGains() {
-  const v = versions(), g = {}, min = Math.min(...Object.values(v).map(x => x.I));
-  for (const k in v) g[k] = $("#match").checked ? dbToLin(min - v[k].I) : 1;
-  return g;
-}
-function applyGains() {
-  if (!pl.playing) return;
-  const g = levelGains(), now = ctx().currentTime;
-  for (const k in pl.gains) pl.gains[k].gain.setTargetAtTime(pl.which === k ? g[k] : 0, now, 0.01);
-}
-function labels() {
-  const live = liveOn();
-  $("#selP").textContent = live ? "Ultima correzione" : "Precedente";
-  $("#selB").textContent = live ? "Anteprima" : "Corretto";
-  $("#selP").disabled = !versions().P;
-  if (pl.which === "P" && $("#selP").disabled) select("B");
-}
-function startPlay(fadeIn = false) {
-  if (!state.track) return;
-  const c = ctx(); c.resume();
-  const v = versions(), key = bufKey();
-  if (pl.bufFor !== key) { pl.bufs = {}; for (const k in v) pl.bufs[k] = toAB(v[k].buf); pl.bufFor = key; }
-  if (pl.which === "P" && !v.P) select("B");
-  const dur = pl.bufs.B.duration; if (pl.off >= dur - 0.05) pl.off = 0;
-  const when = c.currentTime + 0.03, bTs = v.B.ts; pl.gains = {}; pl.src = {};
-  for (const k in v) {
-    const g = c.createGain(); g.gain.value = 0; g.connect(c.destination);
-    const s = c.createBufferSource(); s.buffer = pl.bufs[k]; s.connect(g);
-    const off = Math.max(0, Math.min(pl.bufs[k].duration, pl.off + (bTs - v[k].ts) / v[k].buf.sr));
-    s.start(when, off); pl.gains[k] = g; pl.src[k] = s;
-  }
-  const sB = pl.src.B;
-  sB.onended = () => { if (pl.src && pl.src.B === sB) { stopPlay(); pl.off = 0; updatePos(); } };
-  pl.t0 = when; pl.playing = true;
-  applyGains(); playIcon(true);
-  const loop = () => {
-    if (!pl.playing) return; updatePos();
-    // anteprima continua: prepara il tratto successivo prima di arrivarci
-    if (liveOn() && !LIVE.busy && (!LIVE.win || currentPos() > LIVE.win.b - 5 || currentPos() < LIVE.win.a)) updateLive(currentPos());
-    pl.raf = requestAnimationFrame(loop);
-  };
-  loop();
-}
-function restartPlay() {
-  if (!pl.playing) return;
-  const pos = currentPos(), old = pl.src, oldG = pl.gains, now = ctx().currentTime;
-  for (const k in oldG) oldG[k].gain.setTargetAtTime(0, now, 0.012);
-  setTimeout(() => Object.values(old).forEach(s => { try { s.onended = null; s.stop(); } catch (e) {} }), 80);
-  cancelAnimationFrame(pl.raf); pl.src = null; pl.playing = false; pl.off = pos;
-  startPlay();
-}
-function stopPlay() {
-  if (pl.playing) pl.off = currentPos();
-  if (pl.src) Object.values(pl.src).forEach(s => { try { s.onended = null; s.stop(); } catch (e) {} });
-  pl.src = null; pl.playing = false; cancelAnimationFrame(pl.raf);
-  playIcon(false);
-}
-function currentPos() { return pl.playing ? pl.off + Math.max(0, ctx().currentTime - pl.t0) : pl.off; }
-function updatePos() {
-  if (!state.track) return;
-  const B = versions().B.buf, dur = B.ch[0].length / B.sr, p = Math.min(currentPos(), dur);
-  $("#posR").max = dur.toFixed(1); $("#posR").value = p.toFixed(1);
-  $("#posT").textContent = `${fmtTime(p)} / ${fmtTime(dur)}`;
-}
-function select(w) {
-  pl.which = w;
-  [["A", "#selA"], ["P", "#selP"], ["B", "#selB"]].forEach(([k, id]) => $(id).setAttribute("aria-pressed", w === k));
-  applyGains();
-}
-$("#btnPlay").addEventListener("click", () => pl.playing ? stopPlay() : startPlay());
-$("#posR").addEventListener("input", e => { const was = pl.playing; stopPlay(); pl.off = parseFloat(e.target.value); updatePos(); if (was) startPlay(); else scheduleLive(); });
-$("#selA").addEventListener("click", () => select("A"));
-$("#selP").addEventListener("click", () => select("P"));
-$("#selB").addEventListener("click", () => select("B"));
-$("#match").addEventListener("change", applyGains);
-$("#live").addEventListener("change", () => {
-  const was = pl.playing; stopPlay();
-  if (liveOn() && !state.live) initLive();
-  labels(); updatePos(); $("#liveNote").textContent = "";
-  if (liveOn()) updateLive(pl.off);
-  if (was) startPlay();
-});
-
-/* ---------- Salvataggio WAV (in zip) ---------- */
 function wav24(ch, sr) {
   const n = ch[0].length, nc = 2, dataLen = n * nc * 3, buf = new ArrayBuffer(44 + dataLen), v = new DataView(buf);
   const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
@@ -1312,46 +778,517 @@ function wav24(ch, sr) {
 }
 const CRC_T = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
 function crc32(u8) { let c = 0xFFFFFFFF; for (let i = 0; i < u8.length; i++) c = CRC_T[(c ^ u8[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
-function zipOne(name, data) {
-  const nm = new TextEncoder().encode(name), crc = crc32(data), sz = data.length, d = new Date();
-  const time = (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1);
-  const date = ((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate();
-  const lh = new DataView(new ArrayBuffer(30));
-  lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true); lh.setUint16(8, 0, true);
-  lh.setUint16(10, time, true); lh.setUint16(12, date, true); lh.setUint32(14, crc, true);
-  lh.setUint32(18, sz, true); lh.setUint32(22, sz, true); lh.setUint16(26, nm.length, true); lh.setUint16(28, 0, true);
-  const cd = new DataView(new ArrayBuffer(46));
-  cd.setUint32(0, 0x02014b50, true); cd.setUint16(4, 20, true); cd.setUint16(6, 20, true); cd.setUint16(8, 0x0800, true);
-  cd.setUint16(10, 0, true); cd.setUint16(12, time, true); cd.setUint16(14, date, true); cd.setUint32(16, crc, true);
-  cd.setUint32(20, sz, true); cd.setUint32(24, sz, true); cd.setUint16(28, nm.length, true);
-  cd.setUint32(42, 0, true);
-  const eo = new DataView(new ArrayBuffer(22));
-  eo.setUint32(0, 0x06054b50, true); eo.setUint16(8, 1, true); eo.setUint16(10, 1, true);
-  eo.setUint32(12, 46 + nm.length, true); eo.setUint32(16, 30 + nm.length + sz, true);
-  return new Blob([lh.buffer, nm, data, cd.buffer, nm, eo.buffer]);
+/* ---------- Tipi di traccia e catene ---------- */
+const TYPES = {
+  voce:     { label: "Voce",     c: "--s5", chars: ["Naturale", "Brillante", "Calda"] },
+  cori:     { label: "Cori",     c: "--s5", chars: ["Standard"] },
+  cassa:    { label: "Cassa",    c: "--s1", chars: ["Rock", "Moderna", "Morbida"], reinf: true },
+  rullante: { label: "Rullante", c: "--s1", chars: ["Pieno", "Secco"], reinf: true },
+  tom:      { label: "Tom",      c: "--s1", chars: ["Standard"] },
+  hihat:    { label: "Hi-hat",   c: "--s2", chars: ["Standard"] },
+  overhead: { label: "Overhead", c: "--s2", chars: ["Standard", "Brillante"] },
+  room:     { label: "Room",     c: "--s2", chars: ["Naturale", "Schiacciata"] },
+  basso:    { label: "Basso",    c: "--s3", chars: ["Rotondo", "Presente"] },
+  chitarra: { label: "Chitarra", c: "--s4", chars: ["Naturale", "Grossa", "Tagliente", "Larga"] },
+  tastiere: { label: "Tastiere", c: "--s4", chars: ["Standard"] },
+  altro:    { label: "Altro",    c: "--muted", chars: ["Standard"] },
+};
+const RULES = [
+  ["cori", /^(cori|coro|backing|bv|bvox|bvs|harm|harmony|armonia|doppia|choir)\d*$/],
+  ["voce", /^(voce|voci|vox|voc|vocal|vocals|lead|canto|cantato|leadvox)\d*$/],
+  ["cassa", /^(kick|kik|cassa|bd|bassdrum|grancassa|kickin|kickout)\d*$/],
+  ["rullante", /^(snare|sn|snr|sd|rullante|rull)\d*$/],
+  ["tom", /^(tom|toms|floor|ft|rack|timpano)\d*$/],
+  ["hihat", /^(hh|hat|hihat|charleston|charly)\d*$/],
+  ["overhead", /^(oh|ovh|overhead|overheads|piatti|cymbals|cym)\d*$/],
+  ["room", /^(room|rooms|amb|ambient|ambiente|sala)\d*$/],
+  ["basso", /^(bass|basso|bs|bassdi|bassamp|sub)\d*$/],
+  ["chitarra", /^(gtr|gt|guitar|guitars|chitarra|chitarre|chit|git|acustica|acoustic|elettrica|eg|ag|riff)\d*$/],
+  ["tastiere", /^(keys|key|piano|pno|synth|syn|tastiera|tastiere|organ|organo|rhodes|pad|wurli)\d*$/],
+];
+function classify(name) {
+  const toks = name.toLowerCase().replace(/\.[^.]+$/, "").split(/[^a-zà-ù0-9]+/).filter(Boolean);
+  for (const [type, re] of RULES) if (toks.some(t => re.test(t))) return type;
+  const j = toks.join("");
+  if (/bassdrum|kick/.test(j)) return "cassa";
+  if (/snare/.test(j)) return "rullante";
+  if (/voc|voce/.test(j)) return "voce";
+  if (/guit|chitar/.test(j)) return "chitarra";
+  if (/bass/.test(j)) return "basso";
+  return "altro";
+}
+function chain(type, ch) {
+  const P = (f, g, q = 1) => ["peak", f, g, q], H = (f, g) => ["high", f, g], L = (f, g) => ["low", f, g];
+  switch (type) {
+    case "voce": {
+      const eq = ch === "Brillante" ? [P(300, -2), P(3500, 3.5, .9), H(10000, 3.5)] : ch === "Calda" ? [L(180, 1.5), P(300, -1), P(3500, 1.5, .9), H(10000, 1)] : [P(300, -2), P(3500, 2.5, .9), H(10000, 2)];
+      return { hp: 90, eq, exp: { rel: -45, range: -10 }, deess: true, comp: [{ r: 4, a: 3, rl: 60, gr: 4 }, { r: 2, a: 20, rl: 250, gr: 2 }], off: 0, send: ch === "Calda" ? -12 : ch === "Brillante" ? -15 : -14 };
+    }
+    case "cori": return { hp: 150, eq: [P(300, -3), P(3000, 1), H(10000, 2)], deess: true, comp: [{ r: 4, a: 5, rl: 100, gr: 4 }], off: -7, send: -9, split: true };
+    case "cassa": {
+      const eq = ch === "Moderna" ? [P(55, 4, 1.2), P(380, -5, 1.4), P(5000, 4, 1.5)] : ch === "Morbida" ? [P(70, 2), P(350, -2, 1.4), H(8000, -3)] : [P(60, 3, 1.2), P(350, -4, 1.4), P(3500, 3, 1.5)];
+      return { hp: 30, eq, gate: { rel: -35, range: -20 }, comp: [{ r: 4, a: 10, rl: 80, gr: 3 }], off: -4 };
+    }
+    case "rullante": {
+      const eq = ch === "Secco" ? [P(200, 1, 1.2), P(500, -3, 1.2), P(5000, 3)] : [P(200, 2, 1.2), P(900, -2, 1.5), P(5000, 3), H(10000, 1.5)];
+      return { hp: 80, eq, gate: { rel: -35, range: -15 }, comp: [{ r: 4, a: 5, rl: 100, gr: 3 }], off: -4, send: ch === "Secco" ? -24 : -16 };
+    }
+    case "tom": return { hp: 60, eq: [P(400, -3), P(4000, 2)], gate: { rel: -30, range: -40 }, comp: [{ r: 3, a: 8, rl: 120, gr: 2 }], off: -7, send: -18, spread: true };
+    case "hihat": return { hp: 300, eq: [P(1000, -1), H(9000, 1)], comp: [], off: -13, pan: 0.3 };
+    case "overhead": return { hp: ch === "Brillante" ? 250 : 200, eq: [P(500, -1.5), H(10000, ch === "Brillante" ? 3.5 : 2)], comp: [{ r: 2, a: 15, rl: 200, gr: 1.5 }], off: -9 };
+    case "room": return { hp: 80, eq: [P(400, -2)], comp: [ch === "Schiacciata" ? { r: 8, a: 1, rl: 200, gr: 9 } : { r: 3, a: 10, rl: 200, gr: 3 }], off: ch === "Schiacciata" ? -14 : -12 };
+    case "basso": {
+      const eq = ch === "Presente" ? [P(80, 1.5), P(250, -3, 1.2), P(1000, 3), P(2500, 2)] : [P(80, 2), P(250, -2, 1.2), P(800, 1)];
+      return { hp: 35, eq, comp: [{ r: 4, a: 10, rl: 120, gr: 4 }], sat: 0.25, off: -3, mono: true };
+    }
+    case "chitarra": {
+      const eq = ch === "Grossa" ? [P(120, 1.5), P(250, -1), P(2000, 1)] : ch === "Tagliente" ? [P(250, -3), P(3000, 3), H(8000, 1.5)] : [P(250, -2), P(2500, 1.5)];
+      return { hp: 90, lp: 12000, eq, comp: [{ r: 2.5, a: 15, rl: 150, gr: 2 }], off: -4, send: -22, split: true, widen: ch === "Larga" };
+    }
+    case "tastiere": return { hp: 60, eq: [P(300, -1.5)], comp: [{ r: 2, a: 20, rl: 200, gr: 2 }], off: -7, send: -18 };
+    default: return { hp: 40, eq: [], comp: [{ r: 2, a: 20, rl: 200, gr: 1.5 }], off: -7, send: -20 };
+  }
+}
+
+/* ---------- Elaborazioni per traccia ---------- */
+function eqCoef(kind, fc, g, sr, Q = 1) {
+  const A = Math.pow(10, g / 40), w = 2 * Math.PI * fc / sr, c = Math.cos(w), s = Math.sin(w);
+  let b0, b1, b2, a0, a1, a2;
+  if (kind === "peak") {
+    const al = s / (2 * Q); b0 = 1 + al * A; b1 = -2 * c; b2 = 1 - al * A; a0 = 1 + al / A; a1 = -2 * c; a2 = 1 - al / A;
+  } else {
+    const al = s / 2 * Math.SQRT2, sq = 2 * Math.sqrt(A) * al;
+    if (kind === "low") { b0 = A * ((A + 1) - (A - 1) * c + sq); b1 = 2 * A * ((A - 1) - (A + 1) * c); b2 = A * ((A + 1) - (A - 1) * c - sq); a0 = (A + 1) + (A - 1) * c + sq; a1 = -2 * ((A - 1) + (A + 1) * c); a2 = (A + 1) + (A - 1) * c - sq; }
+    else { b0 = A * ((A + 1) + (A - 1) * c + sq); b1 = -2 * A * ((A - 1) + (A + 1) * c); b2 = A * ((A + 1) + (A - 1) * c - sq); a0 = (A + 1) - (A - 1) * c + sq; a1 = 2 * ((A - 1) - (A + 1) * c); a2 = (A + 1) - (A - 1) * c - sq; }
+  }
+  return { b: [b0 / a0, b1 / a0, b2 / a0], a: [1, a1 / a0, a2 / a0] };
+}
+function applyEq(x, sr, c) {
+  let y = lr4(x, "hp", c.hp, sr);
+  if (c.lp) y = lr4(y, "lp", c.lp, sr);
+  for (const [k, fc, g, q] of c.eq) y = filt(y, eqCoef(k, fc, g, sr, q));
+  return y;
+}
+const R2 = ch => ch.length > 1 ? ch[1] : ch[0];
+function maxOf(a, step = 16) { let m = -Infinity; for (let i = 0; i < a.length; i += step) if (a[i] > m) m = a[i]; return m; }
+function gateExp(ch, sr, rel, range) {
+  const det = detector(ch[0], R2(ch), sr, 3), thr = maxOf(det) + rel, n = det.length;
+  const hold = Math.round(sr * 0.06), aA = 1 - Math.exp(-1 / (sr * 0.0005)), aR = 1 - Math.exp(-1 / (sr * 0.12));
+  const g = new Float32Array(n); let h = 0, cur = range;
+  for (let i = 0; i < n; i++) {
+    if (det[i] > thr) h = hold; else if (h > 0) h--;
+    const t = h > 0 ? 0 : range; cur += (t - cur) * (t > cur ? aA : aR); g[i] = cur;
+  }
+  return ch.map(x => { const y = new Float32Array(n); for (let i = 0; i < n; i++) y[i] = x[i] * Math.pow(10, g[i] / 20); return y; });
+}
+function deess(ch, sr) {
+  const lo = ch.map(x => lr4(x, "lp", 5500, sr)), hi = ch.map(x => lr4(x, "hp", 5500, sr));
+  const dH = detector(hi[0], R2(hi), sr, 2), dF = detector(ch[0], R2(ch), sr, 2), n = dH.length, floor = maxOf(dF) - 40;
+  const aA = 1 - Math.exp(-1 / (sr * 0.001)), aR = 1 - Math.exp(-1 / (sr * 0.04)); let cur = 0;
+  const gr = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    const t = dF[i] > floor ? Math.min(8, Math.max(0, (dH[i] - dF[i] + 6) * 1.2)) : 0;
+    cur += (t - cur) * (t > cur ? aA : aR); gr[i] = cur;
+  }
+  return ch.map((_, c) => { const y = new Float32Array(n), l = lo[c], h = hi[c]; for (let i = 0; i < n; i++) y[i] = l[i] + h[i] * Math.pow(10, -gr[i] / 20); return y; });
+}
+function compAuto(ch, sr, c) {
+  const det = detector(ch[0], R2(ch), sr, 5), floor = maxOf(det) - 40, samp = [];
+  for (let i = 0; i < det.length; i += 32) if (det[i] > floor) samp.push(det[i]);
+  if (!samp.length) return ch;
+  let lo = -80, hi = 0;
+  for (let it = 0; it < 28; it++) { const mid = (lo + hi) / 2; let s = 0; for (const v of samp) s += staticGR(v - mid, c.r, 6); if (s / samp.length > c.gr) lo = mid; else hi = mid; }
+  let thr = (lo + hi) / 2, gr = null;
+  for (let it = 0; it < 4; it++) {
+    gr = smoothGR(det, sr, thr, c.r, 6, c.a, c.rl);
+    let s = 0, k = 0; for (let i = 0; i < det.length; i += 32) if (det[i] > floor) { s += gr[i]; k++; }
+    const avg = s / Math.max(1, k); if (Math.abs(avg - c.gr) < 0.15) break;
+    thr += (avg - c.gr) / (1 - 1 / c.r);
+  }
+  return ch.map(x => { const y = new Float32Array(x.length); for (let i = 0; i < x.length; i++) y[i] = x[i] * Math.pow(10, -gr[i] / 20); return y; });
+}
+/* rinforzo batteria con campioni sintetici */
+function makeHit(type, sr) {
+  const n = Math.round(sr * (type === "cassa" ? 0.4 : 0.3)), y = new Float32Array(n);
+  let ph = 0, ph2 = 0, nz = 0, sd = 7;
+  const rnd = () => { sd = (sd * 16807) % 2147483647; return sd / 2147483647 * 2 - 1; };
+  for (let i = 0; i < n; i++) {
+    const t = i / sr;
+    if (type === "cassa") {
+      ph += 2 * Math.PI * (50 + 90 * Math.exp(-t / 0.025)) / sr;
+      y[i] = Math.sin(ph) * Math.exp(-t / 0.22) + rnd() * 0.25 * Math.exp(-t / 0.002);
+    } else {
+      ph += 2 * Math.PI * 185 / sr; ph2 += 2 * Math.PI * 330 / sr;
+      const r = rnd(); nz += (r - nz) * 0.6;
+      y[i] = 0.6 * Math.sin(ph) * Math.exp(-t / 0.06) + 0.3 * Math.sin(ph2) * Math.exp(-t / 0.04) + 0.8 * (r - nz) * Math.exp(-t / 0.12);
+    }
+  }
+  const ramp = Math.round(sr * 0.0005); for (let i = 0; i < ramp; i++) y[i] *= i / ramp;
+  let p = 0; for (const v of y) p = Math.max(p, Math.abs(v)); for (let i = 0; i < n; i++) y[i] /= p;
+  return y;
+}
+function onsets(x, sr, type) {
+  const band = type === "cassa" ? lr4(x, "lp", 150, sr) : lr4(lr4(x, "hp", 150, sr), "lp", 6000, sr);
+  const ab = new Float32Array(band.length); for (let i = 0; i < ab.length; i++) ab[i] = Math.abs(band[i]);
+  const env = follow(ab, sr, 0.3, 25); let mx = 0; for (let i = 0; i < env.length; i += 4) mx = Math.max(mx, env[i]);
+  const thr = mx * 0.18, refr = Math.round(sr * (type === "cassa" ? 0.07 : 0.06)), look = Math.round(sr * 0.015), out = [];
+  for (let i = 1; i < env.length; i++) {
+    if (env[i] >= thr && env[i - 1] < thr) {
+      let pk = i; for (let j = i; j < Math.min(env.length, i + look); j++) if (env[j] > env[pk]) pk = j;
+      out.push(Math.max(0, i - Math.round(sr * 0.001))); i += refr;
+    }
+  }
+  return out;
+}
+function reinforce(ch, sr, type, amt) {
+  const mono = ch[0], hit = makeHit(type, sr), on = onsets(mono, sr, type), win = Math.round(sr * 0.012);
+  const out = ch.map(x => x.slice());
+  for (const o of on) {
+    let pk = 0; for (let i = o; i < Math.min(mono.length, o + win); i++) pk = Math.max(pk, Math.abs(mono[i]));
+    const k = pk * amt;
+    for (const y of out) for (let i = 0; i < hit.length && o + i < y.length; i++) y[o + i] += hit[i] * k;
+  }
+  return { ch: out, hits: on.length };
+}
+/* limita i picchi isolati rispetto al volume medio della traccia (soft clip) */
+function capPeaks(ch, sr, capDb) {
+  const I = loudness({ sr, ch }).I; if (!isFinite(I)) return ch;
+  const T = dbToLin(I + capDb), h = T * 0.5;
+  return ch.map(x => { const y = new Float32Array(x.length); for (let i = 0; i < x.length; i++) { const v = x[i], a = Math.abs(v); y[i] = a < h ? v : Math.sign(v) * (h + h * Math.tanh((a - h) / h)); } return y; });
+}
+const CAPS = { cassa: 12, rullante: 12, tom: 14, voce: 15, cori: 15, basso: 12, chitarra: 14 };
+function toStereo(ch, pan, widen, sr) {
+  if (ch.length > 1) return ch;
+  const x = ch[0], n = x.length;
+  if (widen) {
+    const R = new Float32Array(n), base = sr * 0.012, dep = sr * 0.003, w = 2 * Math.PI * 0.4 / sr;
+    for (let i = 0; i < n; i++) { const d = base + dep * Math.sin(w * i), p = i - d, k = Math.floor(p), fr = p - k; R[i] = k >= 0 && k + 1 < n ? x[k] * (1 - fr) + x[k + 1] * fr : 0; }
+    return [x, R];
+  }
+  const th = (pan + 1) * Math.PI / 4, gl = Math.cos(th), gr = Math.sin(th), L = new Float32Array(n), Rr = new Float32Array(n);
+  for (let i = 0; i < n; i++) { L[i] = x[i] * gl; Rr[i] = x[i] * gr; }
+  return [L, Rr];
+}
+
+/* ---------- Riverbero comune (convoluzione nativa del browser) ---------- */
+function makeIR(ac, sr, rt, preMs) {
+  const pre = Math.round(sr * preMs / 1000), n = pre + Math.round(sr * rt * 1.3), b = ac.createBuffer(2, n, sr);
+  let tot = 0; const chs = [];
+  for (let c = 0; c < 2; c++) {
+    const d = b.getChannelData(c); let y = 0, sd = 11 + c * 97;
+    for (let i = pre; i < n; i++) {
+      sd = (sd * 16807) % 2147483647; const r = sd / 2147483647 * 2 - 1, t = (i - pre) / sr;
+      const cf = 0.1 + 0.85 * Math.exp(-t / (rt * 0.45)); y += (r - y) * cf;
+      d[i] = y * Math.exp(-6.91 * t / rt); tot += d[i] * d[i];
+    }
+    chs.push(d);
+  }
+  const k = 1 / Math.sqrt(tot / 2 || 1); chs.forEach(d => { for (let i = 0; i < n; i++) d[i] *= k; });
+  return b;
+}
+async function renderReverb(send, sr, rt) {
+  const n = send.length, oc = new OfflineAudioContext(2, n, sr);
+  const buf = oc.createBuffer(1, n, sr); buf.copyToChannel(send, 0);
+  const src = oc.createBufferSource(); src.buffer = buf;
+  const conv = oc.createConvolver(); conv.normalize = false; conv.buffer = makeIR(oc, sr, rt, 25);
+  const hp = oc.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 250;
+  const lp = oc.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 8000;
+  src.connect(conv); conv.connect(hp); hp.connect(lp); lp.connect(oc.destination); src.start();
+  const out = await oc.startRendering();
+  return [out.getChannelData(0), out.getChannelData(1)];
+}
+
+/* ---------- Stato e caricamento ---------- */
+const state = { tracks: [], ref: null, refSpec: null, refI: null, sr: 0, master: null, mix: null, raw: null, stems: null, masterA: null, rawI: null, masterI: null, idSeq: 0 };
+async function addFiles(files) {
+  const list = [...files].filter(f => f && (f.type.startsWith("audio") || /\.(wav|aif|aiff|flac|mp3|m4a|ogg)$/i.test(f.name)));
+  if (!list.length) return;
+  for (let i = 0; i < list.length; i++) {
+    const file = list[i];
+    setStatus(`Apro ${file.name} (${i + 1} di ${list.length})…`, true); await tick();
+    let ab;
+    try { ab = await ctx().decodeAudioData(await file.arrayBuffer()); }
+    catch (e) { setStatus(`${file.name} non si apre nel browser: esportalo in WAV.`); continue; }
+    let ch = [ab.getChannelData(0).slice()];
+    if (ab.numberOfChannels > 1) {
+      const R = ab.getChannelData(1); let d = 0, s = 0;
+      for (let k = 0; k < R.length; k += 7) { d += Math.abs(ch[0][k] - R[k]); s += Math.abs(ch[0][k]); }
+      if (d > s * 1e-3) ch.push(R.slice());
+    }
+    state.sr = ab.sampleRate;
+    const type = classify(file.name);
+    state.tracks.push({ id: ++state.idSeq, name: file.name, ch, dur: ab.duration, type, char: TYPES[type].chars[0], trim: 0, reinf: 40, on: true });
+  }
+  const gtr = state.tracks.filter(t => t.type === "chitarra");
+  if (gtr.length === 1 && gtr[0].ch.length === 1 && gtr[0].char === "Naturale") gtr[0].char = "Larga";
+  setStatus("");
+  renderTracks();
+}
+async function loadRef(file) {
+  if (!file) return;
+  setStatus(`Apro ${file.name}…`, true); await tick();
+  let ab;
+  try { ab = await ctx().decodeAudioData(await file.arrayBuffer()); }
+  catch (e) { setStatus(`${file.name} non si apre nel browser: esportalo in WAV o MP3.`); return; }
+  const L = ab.getChannelData(0), R = ab.numberOfChannels > 1 ? ab.getChannelData(1) : L;
+  const buf = { sr: ab.sampleRate, ch: [L, R] };
+  setStatus("Analizzo il riferimento…", true); await tick();
+  state.refSpec = spectrum(buf); state.refI = loudness(buf).I;
+  $("#nameRef").textContent = `${file.name} (${fmtTime(ab.duration)})`; $("#hintRef").classList.add("hidden"); $("#dropRef").classList.add("loaded");
+  $("#target option[value=ref]").disabled = false; $("#oEq").disabled = false; $("#eqMod").classList.remove("disabled");
+  setStatus("");
+}
+
+/* ---------- Lista tracce ---------- */
+function renderTracks() {
+  const T = state.tracks;
+  $("#empty").classList.toggle("hidden", T.length > 0);
+  $("#tracksPanel").classList.toggle("hidden", !T.length);
+  $("#count").textContent = T.length === 1 ? "1 traccia" : `${T.length} tracce`;
+  const durs = T.map(t => t.dur), spread = T.length ? Math.max(...durs) - Math.min(...durs) : 0;
+  $("#lenWarn").classList.toggle("hidden", spread < 1);
+  $("#tracks").innerHTML = T.map(t => {
+    const ty = TYPES[t.type];
+    return `<div class="trk${t.on ? "" : " off"}" data-id="${t.id}" style="--c:var(${ty.c})">
+      <div class="tname"><label class="tog mini"><input type="checkbox" data-k="on" ${t.on ? "checked" : ""} aria-label="Includi ${esc(t.name)}"><span class="sw"></span></label>
+        <div><b title="${esc(t.name)}">${esc(t.name.replace(/\.[^.]+$/, ""))}</b><small>${fmtTime(t.dur)}, ${t.ch.length > 1 ? "stereo" : "mono"}</small></div></div>
+      <label class="fld">Tipo<select data-k="type">${Object.entries(TYPES).map(([k, v]) => `<option value="${k}" ${k === t.type ? "selected" : ""}>${v.label}</option>`).join("")}</select></label>
+      <label class="fld">Carattere<select data-k="char" ${ty.chars.length < 2 ? "disabled" : ""}>${ty.chars.map(c => `<option ${c === t.char ? "selected" : ""}>${c}</option>`).join("")}</select></label>
+      <label class="fld rng">Volume<span class="rr"><input type="range" data-k="trim" min="-6" max="6" step="0.5" value="${t.trim}"><output>${sgn(t.trim)} dB</output></span></label>
+      ${ty.reinf ? `<label class="fld rng">Rinforzo<span class="rr"><input type="range" data-k="reinf" min="0" max="100" step="5" value="${t.reinf}"><output>${t.reinf}%</output></span></label>` : `<span class="fld spacer"></span>`}
+      <button class="x" data-k="del" aria-label="Rimuovi ${esc(t.name)}">×</button>
+    </div>`;
+  }).join("");
+}
+const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const sgn = v => (v > 0 ? "+" : "") + f(v, 1);
+$("#tracks").addEventListener("input", e => {
+  const row = e.target.closest(".trk"); if (!row) return;
+  const t = state.tracks.find(x => x.id === +row.dataset.id), k = e.target.dataset.k;
+  if (k === "trim") { t.trim = +e.target.value; e.target.nextElementSibling.textContent = sgn(t.trim) + " dB"; }
+  if (k === "reinf") { t.reinf = +e.target.value; e.target.nextElementSibling.textContent = t.reinf + "%"; }
+});
+$("#tracks").addEventListener("change", e => {
+  const row = e.target.closest(".trk"); if (!row) return;
+  const t = state.tracks.find(x => x.id === +row.dataset.id), k = e.target.dataset.k;
+  if (k === "type") { t.type = e.target.value; t.char = TYPES[t.type].chars[0]; renderTracks(); }
+  if (k === "char") t.char = e.target.value;
+  if (k === "on") { t.on = e.target.checked; row.classList.toggle("off", !t.on); }
+});
+$("#tracks").addEventListener("click", e => {
+  const b = e.target.closest("[data-k=del]"); if (!b) return;
+  const id = +b.closest(".trk").dataset.id; state.tracks = state.tracks.filter(x => x.id !== id); renderTracks();
+});
+$("#clearAll").addEventListener("click", () => { stopPlay(); state.tracks = []; renderTracks(); $("#resultPanel").classList.add("hidden"); $("#listen").classList.add("hidden"); });
+
+/* ---------- Mix ---------- */
+function panPlan(active) {
+  const pans = new Map(), byType = t => active.filter(x => x.type === t && x.ch.length === 1);
+  const side = nm => { const k = nm.toLowerCase().replace(/\.[^.]+$/, "").split(/[^a-zà-ù0-9]+/); return k.some(w => /^(sx|l|left|sinistra|sin)$/.test(w)) ? -1 : k.some(w => /^(dx|r|right|destra|des)$/.test(w)) ? 1 : 0; };
+  const g = byType("chitarra").filter(x => x.char !== "Larga"), gp = [-0.75, 0.75, -0.45, 0.45, -0.9, 0.9];
+  if (g.length > 1) { let j = 0; g.forEach(x => { const sd = side(x.name); pans.set(x.id, sd ? 0.75 * sd : gp[j++ % gp.length]); }); }
+  byType("cori").forEach((x, i, a) => pans.set(x.id, a.length > 1 ? (i % 2 ? 0.5 : -0.5) : 0));
+  const toms = byType("tom"); toms.forEach((x, i) => pans.set(x.id, toms.length > 1 ? -0.45 + 0.9 * i / (toms.length - 1) : 0));
+  return pans;
+}
+$("#btnMix").addEventListener("click", async () => {
+  const active = state.tracks.filter(t => t.on);
+  if (!active.length) { setStatus("Aggiungi almeno una traccia."); return; }
+  const btn = $("#btnMix"); btn.disabled = true; stopPlay();
+  try {
+    const sr = state.sr, rv = REV[$("#rev").dataset.v], tail = Math.round(sr * (rv.rt + 0.5));
+    const n = Math.max(...active.map(t => t.ch[0].length)) + tail;
+    const mixL = new Float32Array(n), mixR = new Float32Array(n), send = new Float32Array(n), rawL = new Float32Array(n), rawR = new Float32Array(n);
+    const keep = $("#oStems").checked, stems = [], pans = panPlan(active), notes = [];
+    const cnt = {}; active.forEach(t => cnt[t.type] = (cnt[t.type] || 0) + 1);
+    let idx = 0;
+    for (const t of active) {
+      idx++;
+      const c = chain(t.type, t.char), lab = t.name.replace(/\.[^.]+$/, "");
+      setStatus(`Elaboro ${lab} (${idx} di ${active.length})…`, true); await tick();
+      let ch = t.ch.map(x => applyEq(x, sr, c));
+      if (c.mono && ch.length > 1) { const m = new Float32Array(ch[0].length); for (let i = 0; i < m.length; i++) m[i] = (ch[0][i] + ch[1][i]) * 0.5; ch = [m]; }
+      if (c.gate) ch = gateExp(ch, sr, c.gate.rel, c.gate.range);
+      if (c.exp) ch = gateExp(ch, sr, c.exp.rel, c.exp.range);
+      if (c.deess) { await tick(); ch = deess(ch, sr); }
+      let extra = "";
+      if (TYPES[t.type].reinf && t.reinf > 0) { const r = reinforce(ch, sr, t.type, t.reinf / 100 * 1.2); ch = r.ch; extra = `, ${r.hits} colpi rinforzati`; }
+      for (const cp of c.comp) { await tick(); ch = compAuto(ch, sr, cp); }
+      if (c.sat) ch = saturate(ch, c.sat, []);
+      ch = capPeaks(ch, sr, CAPS[t.type] || 18);
+      const pan = pans.has(t.id) ? pans.get(t.id) : (c.pan || 0);
+      const st = toStereo(ch, pan, c.widen, sr);
+      const I = loudness({ sr, ch: st }).I;
+      if (!isFinite(I)) { notes.push(`${lab}: traccia vuota, saltata.`); continue; }
+      const off = c.off - (c.split && cnt[t.type] > 1 ? 10 * Math.log10(cnt[t.type]) : 0);
+      const gain = dbToLin(-20 + off + t.trim - I), sg = c.send !== undefined ? dbToLin(c.send + rv.off) * gain : 0;
+      const L = st[0], R = st[1];
+      for (let i = 0; i < L.length; i++) { const a = L[i] * gain, b = R[i] * gain; mixL[i] += a; mixR[i] += b; if (sg) send[i] += (L[i] + R[i]) * 0.5 * sg; }
+      const r0 = t.ch[0], r1 = R2(t.ch), rk = t.ch.length > 1 ? 1 : Math.SQRT1_2;
+      for (let i = 0; i < r0.length; i++) { rawL[i] += r0[i] * rk; rawR[i] += r1[i] * rk; }
+      if (keep) stems.push({ name: lab, ch: [L.map(v => v * gain), R.map(v => v * gain)] });
+      notes.push(`${lab}: ${TYPES[t.type].label.toLowerCase()}, ${t.char.toLowerCase()}${pans.has(t.id) && pans.get(t.id) ? `, panorama ${pans.get(t.id) < 0 ? "sinistra" : "destra"}` : c.widen ? ", allargata" : ""}${extra}.`);
+    }
+    setStatus("Aggiungo il riverbero comune…", true); await tick();
+    const [vL, vR] = await renderReverb(send, sr, rv.rt);
+    for (let i = 0; i < n; i++) { mixL[i] += vL[i]; mixR[i] += vR[i]; }
+    if (keep) stems.push({ name: "riverbero", ch: [vL.slice(), vR.slice()] });
+    let mix = [mixL, mixR];
+    const info = [];
+    if ($("#oGlue").checked) { setStatus("Glue sul bus del mix…", true); await tick(); mix = glue(mix, sr, 2, info); }
+    mix = trimEnd(mix, sr);
+    const pk = peaks(mix).sp, mixOut = mix.map(x => { const k = dbToLin(-6) / (pk || 1); return x.map(v => v * k); });
+    let master = null;
+    if ($("#oMaster").checked) {
+      let m = mixOut.map(x => x.slice());
+      if ($("#oEq").checked && state.refSpec) {
+        setStatus("Avvicino il timbro al riferimento…", true); await tick();
+        const curve = matchCurve(spectrum({ sr, ch: m }), state.refSpec, 0.6);
+        m = await convolveStereo(m[0], m[1], firFromCurve(curve, sr));
+      }
+      const tg = target(); const r = await toTarget(m, sr, tg.I, tg.ceil); master = r.ch;
+      info.push(r.capped
+        ? `Master: il target di ${f(tg.I)} LUFS non si raggiunge senza distorcere, il limiter si è fermato a ${f(r.reached)} LUFS. Per un master più forte serve un mix con picchi più controllati, o un target più basso.`
+        : `Master: ${f(tg.I)} LUFS, riduzione massima del limiter ${f(r.gr)} dB.`);
+    }
+    const rawTrim = [rawL.subarray(0, mixOut[0].length), rawR.subarray(0, mixOut[0].length)];
+    const rpk = peaks(rawTrim).sp || 1, raw = rawTrim.map(x => x.map(v => v / rpk * 0.9));
+    Object.assign(state, { mix: mixOut, master, raw, stems: keep ? stems : null });
+    const out = master || mixOut, oa = loudness({ sr, ch: out }), op = peaks(out);
+    state.outI = oa.I; state.rawI = loudness({ sr, ch: raw }).I;
+    showResult(oa, op, notes, info);
+    setStatus("Mix completato.");
+  } catch (e) {
+    console.error(e);
+    setStatus("Il mix si è interrotto: probabilmente il browser ha esaurito la memoria. Prova con meno tracce, disattiva \"Conserva le tracce elaborate\" o chiudi altre schede.");
+  } finally { btn.disabled = false; }
+});
+function trimEnd(ch, sr) {
+  const n = ch[0].length, thr = dbToLin(-70); let b = n - 1;
+  while (b > 0 && Math.abs(ch[0][b]) < thr && Math.abs(ch[1][b]) < thr) b--;
+  const end = Math.min(n, b + Math.round(sr * 0.3)), fo = Math.min(end, Math.round(sr * 0.05));
+  return ch.map(x => { const y = x.slice(0, end); for (let i = 0; i < fo; i++) y[end - 1 - i] *= i / fo; return y; });
+}
+const REV = { secco: { rt: 1.0, off: -6 }, medio: { rt: 1.7, off: 0 }, ampio: { rt: 2.5, off: 3 } };
+function target() {
+  const v = $("#target").value, ceil = parseFloat($("#ceil").value);
+  return { I: v === "ref" && isFinite(state.refI) ? Math.round(state.refI * 10) / 10 : parseFloat(v === "ref" ? -14 : v), ceil };
+}
+function showResult(oa, op, notes, info) {
+  const tp = linToDb(op.tp);
+  $("#resultPanel").classList.remove("hidden"); $("#listen").classList.remove("hidden");
+  $("#outLufs").innerHTML = `${f(oa.I)}<small>LUFS</small>`;
+  $("#outCap").textContent = state.master ? "Master, loudness integrata" : "Mix senza master, loudness integrata";
+  $("#outChips").innerHTML = [[f(tp), "True peak, dBTP"], [f(tp - oa.I), "PLR, dB"], [f(oa.LRA), "Loudness range, LU"], [fmtTime(state.mix[0].length / state.sr), "Durata"]]
+    .map(([v, l]) => `<div class="chip"><b class="num">${v}</b><span>${l}</span></div>`).join("");
+  $("#log").innerHTML = [...info, ...notes].map(x => `<li>${esc(x)}</li>`).join("");
+  $("#dlMaster").classList.toggle("hidden", !state.master);
+  $("#dlStems").classList.toggle("hidden", !state.stems);
+  pl.bufFor = null; pl.off = 0; updatePos();
+}
+
+/* ---------- Ascolto ---------- */
+const pl = { src: null, gains: null, t0: 0, off: 0, playing: false, which: "B", raf: 0, bufs: null, bufFor: null };
+function toAB(ch, sr) { const ab = ctx().createBuffer(2, ch[0].length, sr); ab.copyToChannel(ch[0], 0); ab.copyToChannel(ch[1], 1); return ab; }
+function outCh() { return state.master || state.mix; }
+function startPlay() {
+  if (!state.mix) return;
+  const c = ctx(); c.resume();
+  if (pl.bufFor !== outCh()) { pl.bufs = { A: toAB(state.raw, state.sr), B: toAB(outCh(), state.sr) }; pl.bufFor = outCh(); }
+  const dur = pl.bufs.B.duration; if (pl.off >= dur - 0.05) pl.off = 0;
+  const when = c.currentTime + 0.03; pl.src = {}; pl.gains = {};
+  for (const k of ["A", "B"]) {
+    const g = c.createGain(); g.gain.value = 0; g.connect(c.destination);
+    const s = c.createBufferSource(); s.buffer = pl.bufs[k]; s.connect(g); s.start(when, Math.min(pl.off, pl.bufs[k].duration));
+    pl.src[k] = s; pl.gains[k] = g;
+  }
+  const sB = pl.src.B; sB.onended = () => { if (pl.src && pl.src.B === sB) { stopPlay(); pl.off = 0; updatePos(); } };
+  pl.t0 = when; pl.playing = true; applyGains(); playIcon(true);
+  const loop = () => { if (!pl.playing) return; updatePos(); pl.raf = requestAnimationFrame(loop); }; loop();
+}
+function levelGains() {
+  if (!$("#match").checked) return { A: 1, B: 1 };
+  const d = state.outI - state.rawI;
+  return d > 0 ? { A: 1, B: dbToLin(-d) } : { A: dbToLin(d), B: 1 };
+}
+function applyGains() { if (!pl.playing) return; const g = levelGains(), now = ctx().currentTime; for (const k in pl.gains) pl.gains[k].gain.setTargetAtTime(pl.which === k ? g[k] : 0, now, 0.01); }
+function stopPlay() {
+  if (pl.playing) pl.off = currentPos();
+  if (pl.src) Object.values(pl.src).forEach(s => { try { s.onended = null; s.stop(); } catch (e) {} });
+  pl.src = null; pl.playing = false; cancelAnimationFrame(pl.raf); playIcon(false);
+}
+function currentPos() { return pl.playing ? pl.off + Math.max(0, ctx().currentTime - pl.t0) : pl.off; }
+function updatePos() {
+  if (!state.mix) return;
+  const dur = state.mix[0].length / state.sr, p = Math.min(currentPos(), dur);
+  $("#posR").max = dur.toFixed(1); $("#posR").value = p.toFixed(1); $("#posT").textContent = `${fmtTime(p)} / ${fmtTime(dur)}`;
+}
+const ICON_PLAY = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>';
+const ICON_PAUSE = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4.5" width="4" height="15" rx="1"/><rect x="14" y="4.5" width="4" height="15" rx="1"/></svg>';
+function playIcon(on) { const b = $("#btnPlay"); b.innerHTML = on ? ICON_PAUSE : ICON_PLAY; b.setAttribute("aria-label", on ? "Pausa" : "Ascolta"); }
+playIcon(false);
+function select(w) { pl.which = w; $("#selA").setAttribute("aria-pressed", w === "A"); $("#selB").setAttribute("aria-pressed", w === "B"); applyGains(); }
+$("#btnPlay").addEventListener("click", () => pl.playing ? stopPlay() : startPlay());
+$("#posR").addEventListener("input", e => { const was = pl.playing; stopPlay(); pl.off = +e.target.value; updatePos(); if (was) startPlay(); });
+$("#selA").addEventListener("click", () => select("A"));
+$("#selB").addEventListener("click", () => select("B"));
+$("#match").addEventListener("change", applyGains);
+
+/* ---------- Salvataggio ---------- */
+function zipMany(files) {
+  const parts = [], cds = []; let off = 0; const d = new Date();
+  const time = (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1), date = ((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate();
+  for (const { name, data } of files) {
+    const nm = new TextEncoder().encode(name), crc = crc32(data), sz = data.length;
+    const lh = new DataView(new ArrayBuffer(30));
+    lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true); lh.setUint16(10, time, true); lh.setUint16(12, date, true);
+    lh.setUint32(14, crc, true); lh.setUint32(18, sz, true); lh.setUint32(22, sz, true); lh.setUint16(26, nm.length, true);
+    const cd = new DataView(new ArrayBuffer(46));
+    cd.setUint32(0, 0x02014b50, true); cd.setUint16(4, 20, true); cd.setUint16(6, 20, true); cd.setUint16(8, 0x0800, true); cd.setUint16(12, time, true); cd.setUint16(14, date, true);
+    cd.setUint32(16, crc, true); cd.setUint32(20, sz, true); cd.setUint32(24, sz, true); cd.setUint16(28, nm.length, true); cd.setUint32(42, off, true);
+    parts.push(lh.buffer, nm, data); cds.push(cd.buffer, nm); off += 30 + nm.length + sz;
+  }
+  const cdSize = cds.reduce((s, p) => s + (p.byteLength ?? p.length), 0), eo = new DataView(new ArrayBuffer(22));
+  eo.setUint32(0, 0x06054b50, true); eo.setUint16(8, files.length, true); eo.setUint16(10, files.length, true); eo.setUint32(12, cdSize, true); eo.setUint32(16, off, true);
+  return new Blob([...parts, ...cds, eo.buffer]);
 }
 function saveBlob(blob, name) {
   const url = URL.createObjectURL(blob), a = document.createElement("a");
   a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 60000);
 }
-$("#saveNote").textContent = "WAV 24 bit";
-$("#btnSave").addEventListener("click", async () => {
-  if (!state.proc) return;
-  const btn = $("#btnSave"); btn.disabled = true;
-  $("#saveNote").textContent = "Preparo il file…"; await tick();
-  try {
-    saveBlob(new Blob([wav24(state.proc.ch, state.proc.sr)], { type: "audio/wav" }), `${state.base}-master.wav`);
-    $("#saveNote").textContent = "File scaricato.";
-  } catch (e) { $("#saveNote").textContent = "Il salvataggio non è riuscito: il brano potrebbe essere troppo lungo per la memoria del browser."; }
-  finally { btn.disabled = false; }
-});
-})();
+const base = () => ($("#title").value.trim() || "brano").replace(/[^\w\- ]+/g, "").trim() || "brano";
+async function dl(btn, fn) {
+  btn.disabled = true; const old = btn.textContent; btn.textContent = "Preparo…"; await tick();
+  try { fn(); } catch (e) { setStatus("Il salvataggio non è riuscito: memoria insufficiente nel browser."); }
+  finally { btn.disabled = false; btn.textContent = old; }
+}
+$("#dlMaster").addEventListener("click", e => dl(e.currentTarget, () => saveBlob(new Blob([wav24(state.master, state.sr)], { type: "audio/wav" }), `${base()}-master.wav`)));
+$("#dlMix").addEventListener("click", e => dl(e.currentTarget, () => saveBlob(new Blob([wav24(state.mix, state.sr)], { type: "audio/wav" }), `${base()}-mix.wav`)));
+$("#dlStems").addEventListener("click", e => dl(e.currentTarget, () => {
+  const used = {}; const files = state.stems.map(s => { let nm = s.name.replace(/[^\w\- ]+/g, "").trim() || "traccia"; used[nm] = (used[nm] || 0) + 1; if (used[nm] > 1) nm += "-" + used[nm]; return { name: `${nm}.wav`, data: wav24(s.ch, state.sr) }; });
+  saveBlob(zipMany(files), `${base()}-tracce.zip`);
+}));
 
-</script>
-<script>
+/* ---------- Ingressi ---------- */
+function wireDropZone(el, onFiles) {
+  el.addEventListener("dragover", e => { e.preventDefault(); el.classList.add("over"); });
+  el.addEventListener("dragleave", () => el.classList.remove("over"));
+  el.addEventListener("drop", e => { e.preventDefault(); el.classList.remove("over"); onFiles(e.dataTransfer.files); });
+}
+$("#files").addEventListener("change", e => { addFiles(e.target.files); e.target.value = ""; });
+wireDropZone($("#empty"), addFiles);
+wireDropZone($("#tracksPanel"), addFiles);
+$("#fileRef").addEventListener("change", e => loadRef(e.target.files[0]));
+wireDropZone($("#dropRef"), fs => loadRef(fs[0]));
 window.addEventListener("dragover", e => e.preventDefault());
 window.addEventListener("drop", e => e.preventDefault());
+document.querySelectorAll("#rev button").forEach(b => b.addEventListener("click", () => {
+  $("#rev").dataset.v = b.dataset.v; document.querySelectorAll("#rev button").forEach(x => x.setAttribute("aria-pressed", x === b));
+}));
+
+$("#files").addEventListener("more", e => addFiles(e.detail));
+})();
 </script>
 </body>
 </html>
