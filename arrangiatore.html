@@ -194,6 +194,7 @@ td.val{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:500}
 .legend span::before{background:var(--c)}
 .barsgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:6px;margin-top:14px}
 .steps a{color:var(--s4)}
+.warnbox{margin:0 0 14px;padding:10px 14px;border-radius:12px;background:color-mix(in srgb,var(--s2) 14%,transparent);font-size:.88rem;max-width:90ch}
 .bar{position:relative;text-align:left;border:0;border-radius:10px;padding:8px 10px 9px;background:color-mix(in srgb,var(--c) 14%,var(--panel));cursor:pointer;min-height:58px;border-top:3px solid var(--c)}
 .bar small{display:block;font-size:.7rem;color:var(--muted)}
 .bar b{display:block;font-family:var(--display);font-weight:500;font-size:.95rem;letter-spacing:-.01em;line-height:1.2}
@@ -218,7 +219,7 @@ input[type=number]{background:var(--panel);border:1px solid var(--line);border-r
   <aside class="rail">
     <div class="brand">
       <h1>Arrangiatore</h1>
-      <p>Da voce e chitarra a una band completa: batteria, basso e tastiere a tempo col tuo brano, da portare in Cubase.</p>
+      <p>Da voce e chitarra, o anche dalla sola voce, a una band completa: batteria, basso e tastiere a tempo col tuo brano, da portare in Cubase.</p>
       <nav class="tools" aria-label="Strumenti">
         <a href="arrangiatore.html" aria-current="page">Arrangia</a>
         <a href="intonazione-voce.html">Voce</a>
@@ -233,12 +234,12 @@ input[type=number]{background:var(--panel);border:1px solid var(--line);border-r
         <label class="drop track" id="dropGtr">
           <input type="file" id="fileGtr" accept="audio/*,.wav,.flac,.mp3,.m4a,.ogg,.aif,.aiff">
           <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
-          <span><b>Chitarra</b><small class="file" id="nameGtr"></small><small id="hintGtr">Registrata col metronomo</small></span>
+          <span><b>Chitarra</b><small class="file" id="nameGtr"></small><small id="hintGtr">Col metronomo. Senza, gli accordi si ricavano dalla voce</small></span>
         </label>
         <label class="drop ref" id="dropVox">
           <input type="file" id="fileVox" accept="audio/*,.wav,.flac,.mp3,.m4a,.ogg,.aif,.aiff">
           <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v4"/></svg></span>
-          <span><b>Voce</b><small class="file" id="nameVox"></small><small id="hintVox">Facoltativa, aiuta a trovare le sezioni</small></span>
+          <span><b>Voce</b><small class="file" id="nameVox"></small><small id="hintVox">Col metronomo. Con la chitarra aiuta a trovare le sezioni</small></span>
         </label>
       </div>
       <div class="status" id="status" role="status" aria-live="polite"></div>
@@ -277,7 +278,7 @@ input[type=number]{background:var(--panel);border:1px solid var(--line);border-r
           <i style="width:12px;border-radius:4px;background:var(--s3);height:45%"></i><i style="width:12px;border-radius:4px;background:var(--s3);height:70%"></i><i style="width:12px;border-radius:4px;background:var(--s1);height:100%"></i><i style="width:12px;border-radius:4px;background:var(--s1);height:85%"></i><i style="width:12px;border-radius:4px;background:var(--s3);height:55%"></i><i style="width:12px;border-radius:4px;background:var(--s3);height:65%"></i><i style="width:12px;border-radius:4px;background:var(--s1);height:95%"></i><i style="width:12px;border-radius:4px;background:var(--s5);height:40%"></i>
         </div>
         <h2>Trascina qui la chitarra</h2>
-        <p>Registrata col metronomo ed esportata da Cubase dall'inizio del progetto. Poi aggiungi la voce nel pannello a sinistra.</p>
+        <p>Registrata col metronomo ed esportata da Cubase dall'inizio del progetto. Hai solo la voce? Caricala nel pannello a sinistra: gli accordi verranno ricavati dalla melodia.</p>
       </div>
     </label>
 
@@ -289,6 +290,7 @@ input[type=number]{background:var(--panel);border:1px solid var(--line);border-r
           <span>Inizio battuta <button class="nb" id="nDnL" aria-label="Anticipa l'inizio della battuta di un battito">−1</button><button class="nb" id="nDnR" aria-label="Posticipa l'inizio della battuta di un battito">+1</button></span>
           <span>Usali se gli accordi sembrano cambiare a metà battuta. Rifanno l'analisi e annullano le modifiche a mano.</span>
         </div>
+        <p class="warnbox hidden" id="voxOnly">Senza chitarra gli accordi sono ricavati dalla melodia: sono una proposta, non una trascrizione. Ascolta la demo e correggi le battute che non ti convincono. L'intro, se c'è, va aggiunta a mano: il brano parte dalla prima nota cantata.</p>
         <div class="legend" id="legendSec"></div>
         <div class="barsgrid" id="bars"></div>
         <div class="editor hidden" id="editor">
@@ -329,7 +331,7 @@ input[type=number]{background:var(--panel);border:1px solid var(--line);border-r
     <div class="transport hidden" id="listen">
       <button class="play" id="btnPlay" aria-label="Ascolta"></button>
       <div class="seg" role="group" aria-label="Versione da ascoltare">
-        <button id="selA" aria-pressed="false">Voce e chitarra</button>
+        <button id="selA" aria-pressed="false">Tracce originali</button>
         <button id="selB" aria-pressed="true">Demo</button>
       </div>
       <div class="pos"><input type="range" id="posR" min="0" max="100" step="0.1" value="0" aria-label="Posizione"><span id="posT" class="num">0:00</span></div>
@@ -993,6 +995,7 @@ function detectSections(bars) {
   return sec;
 }
 function buildBars() {
+  if (!S.gtr) return buildBarsVoice();
   const F = S.F, P = 60 / S.bpm, bl = S.beats * P;
   let phase = S.phase + S.phAdj * P / 2; phase = ((phase % P) + P) % P;
   let t0 = phase + (((S.down + S.dnAdj) % S.beats) + S.beats) % S.beats * P;
@@ -1008,6 +1011,198 @@ function buildBars() {
   bars.forEach((b, i) => { b.chords = [ch[2 * i], ch[2 * i + 1]]; });
   const sec = detectSections(bars);
   bars.forEach((b, i) => { b.sec = sec[i]; if (sec[i] === "vuoto") b.chords = [null, null]; });
+  S.bars = bars;
+}
+
+const median = a => { const s = Float64Array.from(a).sort(); return s.length ? s[s.length >> 1] : NaN; };
+/* ---------- Rilevamento dell'altezza (YIN) ---------- */
+const PSR = 16000, HOP = 160, W = 512, TMAX = 229, TMIN = 16, NFFT = 1024, FT = HOP / PSR, T0 = (W / 2) / PSR;
+function toMonoV(ch) { if (ch.length === 1) return ch[0]; const n = ch[0].length, m = new Float32Array(n); for (let i = 0; i < n; i++) m[i] = (ch[0][i] + ch[1][i]) * 0.5; return m; }
+function resample16k(x, sr) {
+  if (sr === PSR) return x;
+  const q = rbj("lp", 7000, sr); const y = filt(filt(x, q), q);
+  const r = sr / PSR, n = Math.floor((x.length - 1) / r), o = new Float32Array(n);
+  for (let i = 0; i < n; i++) { const p = i * r, k = Math.floor(p), fr = p - k; o[i] = y[k] * (1 - fr) + y[k + 1] * fr; }
+  return o;
+}
+async function trackPitch(x, onProg) {
+  const nF = Math.max(0, Math.floor((x.length - W - TMAX) / HOP) + 1);
+  const f0 = new Float32Array(nF), ap = new Float32Array(nF).fill(1), rms = new Float32Array(nF);
+  const S = new Float64Array(x.length + 1); for (let i = 0; i < x.length; i++) S[i + 1] = S[i] + x[i] * x[i];
+  let mx = 0; for (let k = 0; k < nF; k++) { const o = k * HOP; rms[k] = Math.sqrt((S[o + W] - S[o]) / W); if (rms[k] > mx) mx = rms[k]; }
+  const thr = mx * Math.pow(10, -40 / 20);
+  const ar = new Float64Array(NFFT), ai = new Float64Array(NFFT), br = new Float64Array(NFFT), bi = new Float64Array(NFFT), d = new Float64Array(TMAX + 2);
+  for (let k = 0; k < nF; k++) {
+    if (k % 2000 === 0) { onProg && onProg(k / nF); await tick(); }
+    if (rms[k] < thr) continue;
+    const o = k * HOP;
+    ar.fill(0); ai.fill(0); br.fill(0); bi.fill(0);
+    for (let j = 0; j < W; j++) ar[j] = x[o + j];
+    for (let j = 0; j < W + TMAX; j++) br[j] = x[o + j];
+    fft(ar, ai, false); fft(br, bi, false);
+    for (let i = 0; i < NFFT; i++) { const a = ar[i], b = -ai[i], c = br[i], e = bi[i]; ar[i] = a * c - b * e; ai[i] = a * e + b * c; }
+    fft(ar, ai, true);
+    const e0 = S[o + W] - S[o];
+    d[0] = 1; let run = 0;
+    for (let t = 1; t <= TMAX; t++) {
+      const et = S[o + t + W] - S[o + t], dt = e0 + et - 2 * ar[t];
+      run += dt; d[t] = run > 0 ? dt * t / run : 1;
+    }
+    let tau = -1;
+    for (let t = TMIN; t <= TMAX; t++) if (d[t] < 0.15) { while (t + 1 <= TMAX && d[t + 1] < d[t]) t++; tau = t; break; }
+    if (tau < 0) { let best = TMIN; for (let t = TMIN; t <= TMAX; t++) if (d[t] < d[best]) best = t; tau = best; }
+    let tf = tau;
+    if (tau > TMIN && tau < TMAX) { const a = d[tau - 1], b = d[tau], c = d[tau + 1], den = a - 2 * b + c; if (den > 0) tf = tau + 0.5 * (a - c) / den; }
+    f0[k] = PSR / tf; ap[k] = d[tau];
+  }
+  return { f0, ap, rms };
+}
+function postPitch(p) {
+  const n = p.f0.length, midi = new Float32Array(n).fill(NaN), v = new Uint8Array(n);
+  for (let k = 0; k < n; k++) if (p.f0[k] > 0 && p.ap[k] < 0.25 && p.f0[k] >= 70 && p.f0[k] <= 1000) { v[k] = 1; midi[k] = 69 + 12 * Math.log2(p.f0[k] / 440); }
+  // correzione degli errori d'ottava rispetto al contesto
+  for (let k = 0; k < n; k++) if (v[k]) {
+    const ctx = []; for (let j = k - 10; j <= k + 10; j++) if (j >= 0 && j < n && v[j]) ctx.push(midi[j]);
+    const med = median(ctx), dlt = midi[k] - med;
+    if (Math.abs(dlt) > 9) midi[k] -= 12 * Math.round(dlt / 12);
+  }
+  // mediana su 5 frame
+  const sm = midi.slice();
+  for (let k = 0; k < n; k++) if (v[k]) { const w = []; for (let j = k - 2; j <= k + 2; j++) if (j >= 0 && j < n && v[j]) w.push(midi[j]); sm[k] = median(w); }
+  // elimina frammenti sonori troppo brevi
+  for (let k = 0; k < n;) { if (!v[k]) { k++; continue; } let e = k; while (e < n && v[e]) e++; if (e - k < 4) for (let j = k; j < e; j++) { v[j] = 0; sm[j] = NaN; } k = e; }
+  return { midi: sm, voiced: v };
+}
+function segment(midi, v) {
+  const n = midi.length, notes = []; let cur = null;
+  const close = () => {
+    if (cur && cur.e - cur.s + 1 >= 8) {
+      const vals = cur.vals, L = vals.length, a = Math.floor(L * 0.2), b = Math.max(a + 1, Math.ceil(L * 0.8));
+      cur.center = median(vals.slice(a, b));
+      cur.vib = vibrato(vals);
+      notes.push(cur);
+    }
+    cur = null;
+  };
+  for (let k = 0; k < n; k++) {
+    if (!v[k]) { close(); continue; }
+    if (!cur) { cur = { s: k, e: k, vals: [midi[k]] }; continue; }
+    const ref = median(cur.vals.slice(-14));
+    if (Math.abs(midi[k] - ref) > 0.75) {
+      let far = true;
+      for (let j = 1; j <= 4; j++) if (k + j >= n || !v[k + j] || Math.abs(midi[k + j] - ref) <= 0.75) far = false;
+      if (far) { close(); cur = { s: k, e: k, vals: [midi[k]] }; continue; }
+    }
+    cur.e = k; cur.vals.push(midi[k]);
+  }
+  close();
+  return notes;
+}
+function vibrato(vals) {
+  const L = vals.length; if (L < 40) return null;
+  const h = 12, res = [];
+  for (let i = h; i < L - h; i++) { let s = 0; for (let j = i - h; j <= i + h; j++) s += vals[j]; res.push(vals[i] - s / (2 * h + 1)); }
+  let ss = 0, zc = 0; for (let i = 0; i < res.length; i++) { ss += res[i] * res[i]; if (i && (res[i] > 0) !== (res[i - 1] > 0)) zc++; }
+  const ext = Math.sqrt(ss / res.length) * Math.SQRT2 * 100, rate = zc / 2 / (res.length * FT);
+  return ext >= 15 && rate >= 4 && rate <= 8.5 ? { ext, rate } : null;
+}
+/* ---------- Modalità solo voce: accordi dalla melodia ---------- */
+async function analyzeMelody(x, sr) {
+  const x16 = resample16k(x, sr);
+  const p = await trackPitch(x16, pr => setStatus(`Riconosco le note cantate… ${Math.round(pr * 100)}%`, true));
+  const { midi, voiced } = postPitch(p);
+  const notes = segment(midi, voiced).map(n => ({ t0: n.s * FT + T0, t1: (n.e + 1) * FT + T0, m: n.center }));
+  return notes;
+}
+function melodyKey(notes) {
+  const h = new Array(12).fill(0);
+  notes.forEach(n => h[((Math.round(n.m) % 12) + 12) % 12] += n.t1 - n.t0);
+  return keyFromHist(h);
+}
+function melodyHist(notes, t0, t1, beatP) {
+  const h = new Float64Array(12); let tot = 0;
+  for (const n of notes) {
+    const ov = Math.min(t1, n.t1) - Math.max(t0, n.t0); if (ov <= 0) continue;
+    const onBeat = Math.abs(((n.t0 - t0) / beatP) - Math.round((n.t0 - t0) / beatP)) * beatP < 0.07;
+    const w = ov * (onBeat ? 1.5 : 1) * (Math.abs(n.t0 - t0) < 0.07 ? 1.3 : 1);
+    h[((Math.round(n.m) % 12) + 12) % 12] += w; tot += ov;
+  }
+  return { h, tot };
+}
+function melodyChords(segs, key, halfLen) {
+  const quals = $("#o7").checked ? Object.keys(QUAL) : ["", "m"];
+  const states = []; for (let r = 0; r < 12; r++) for (const q of quals) states.push({ r, q });
+  const scale = new Set((key.minor ? [0, 2, 3, 5, 7, 8, 10, 11] : [0, 2, 4, 5, 7, 9, 11]).map(i => (i + key.r) % 12));
+  const dia = diatonic(key), NS = states.length;
+  const deg = s => ((s.r - key.r) + 12) % 12;
+  const weight = s => { const d = deg(s); if (!dia.has(s.r + s.q)) return -0.9; if (d === 0) return 0.55; if (d === 5 || d === 7) return 0.45; if ((d === 9 && !key.minor) || (d === 3 && key.minor)) return 0.35; return 0.2; };
+  const fits = states.map(s => { const f = new Float64Array(12); for (let pc = 0; pc < 12; pc++) f[pc] = scale.has(pc) ? -0.25 : -0.9; QUAL[s.q].forEach((iv, i) => f[(s.r + iv) % 12] = i === 0 ? 1 : i === 3 ? 0.75 : i === 2 ? 0.85 : 1); return f; });
+  const emit = segs.map(sg => {
+    const out = new Float64Array(NS);
+    if (sg.tot < halfLen * 0.12) return out;
+    let hs = 0; for (const v of sg.h) hs += v;
+    for (let s = 0; s < NS; s++) { let c = 0; for (let pc = 0; pc < 12; pc++) c += sg.h[pc] * fits[s][pc]; out[s] = c / hs * 6 + weight(states[s]); }
+    return out;
+  });
+  const good = new Set(["7>0", "5>0", "5>7", "0>5", "9>5", "2>7", "0>9", "0>7", "7>9", "4>9", "10>0", "8>10", "3>8"]);
+  const trans = (a, b, t) => {
+    if (a === b) return 0;
+    const mv = deg(states[a]) + ">" + deg(states[b]);
+    return -0.7 + (good.has(mv) ? 0.45 : 0) - (t % 2 === 1 ? 0.6 : 0);
+  };
+  const T = segs.length, dp = new Float64Array(T * NS), bp = new Int32Array(T * NS);
+  for (let s = 0; s < NS; s++) dp[s] = emit[0][s];
+  for (let t = 1; t < T; t++) for (let s = 0; s < NS; s++) {
+    let best = -Infinity, arg = 0;
+    for (let q = 0; q < NS; q++) { const v = dp[(t - 1) * NS + q] + trans(q, s, t); if (v > best) { best = v; arg = q; } }
+    dp[t * NS + s] = best + emit[t][s]; bp[t * NS + s] = arg;
+  }
+  let s = 0; for (let k = 1; k < NS; k++) if (dp[(T - 1) * NS + k] > dp[(T - 1) * NS + s]) s = k;
+  const score = dp[(T - 1) * NS + s], out = new Array(T);
+  for (let t = T - 1; t >= 0; t--) { out[t] = { ...states[s] }; s = bp[t * NS + s]; }
+  return { chords: out, score };
+}
+function barsFromGrid(down) {
+  const P = 60 / S.bpm, bl = S.beats * P;
+  let phase = S.phase + S.phAdj * P / 2; phase = ((phase % P) + P) % P;
+  let t0 = phase + (((down + S.dnAdj) % S.beats) + S.beats) % S.beats * P;
+  while (t0 > 0.05) t0 -= bl;
+  const bars = []; for (let t = t0; t < S.F.dur - P; t += bl) bars.push({ t0: t, t1: t + bl });
+  return bars;
+}
+function buildBarsVoice() {
+  const P = 60 / S.bpm, bl = S.beats * P, notes = S.notes;
+  S.key = melodyKey(notes);
+  const first = notes.length ? notes[0].t0 : 0, last = notes.length ? notes[notes.length - 1].t1 : 0;
+  let best = null;
+  for (let d = 0; d < S.beats; d++) {
+    const bars = barsFromGrid(d);
+    const segs = []; bars.forEach(b => { segs.push(melodyHist(notes, b.t0, b.t0 + bl / 2, P)); segs.push(melodyHist(notes, b.t0 + bl / 2, b.t1, P)); });
+    const r = melodyChords(segs, S.key, bl / 2);
+    if (!best || r.score > best.score) best = { ...r, bars, d };
+  }
+  S.down = best.d;
+  const bars = best.bars;
+  bars.forEach((b, i) => {
+    b.chords = [best.chords[2 * i], best.chords[2 * i + 1]];
+    const inSong = b.t1 > first - 0.05 && b.t0 < last + 0.05;
+    b.sec = inSong ? "strofa" : "vuoto";
+    if (!inSong) b.chords = [null, null];
+  });
+  // strofa e ritornello: i ritornelli di solito sono più forti e più acuti
+  const idx = bars.map((b, i) => i).filter(i => bars[i].sec !== "vuoto");
+  const score = idx.map(i => {
+    const b = bars[i], e = 20 * Math.log10(barEnergy(S.vox, b.t0, b.t1) + 1e-9);
+    const ns = notes.filter(n => n.t1 > b.t0 && n.t0 < b.t1), m = ns.length ? ns.reduce((s, n) => s + n.m * (n.t1 - n.t0), 0) / ns.reduce((s, n) => s + (n.t1 - n.t0), 0) : NaN;
+    return { i, e, m };
+  });
+  const mm = score.filter(x => isFinite(x.m)), gm = mm.reduce((s, x) => s + x.m, 0) / Math.max(1, mm.length);
+  const val = score.map(x => x.e + 0.8 * ((isFinite(x.m) ? x.m : gm) - gm));
+  const sm = val.map((v, k) => { let s = 0, c = 0; for (let j = k - 1; j <= k + 1; j++) if (j >= 0 && j < val.length) { s += val[j]; c++; } return s / c; });
+  const sorted = [...sm].sort((a, b) => a - b), q25 = sorted[Math.floor(sorted.length * 0.25)] ?? 0, q85 = sorted[Math.floor(sorted.length * 0.85)] ?? 0;
+  if (q85 - q25 > 2.5) score.forEach((x, k) => bars[x.i].sec = sm[k] > (q25 + q85) / 2 ? "ritornello" : "strofa");
+  for (let k = 1; k < idx.length - 1; k++) { const i = idx[k]; if (bars[i].sec !== bars[i - 1].sec && bars[i].sec !== bars[i + 1].sec) bars[i].sec = bars[i - 1].sec; }
+  for (let k = 1; k < idx.length; k++) { const i = idx[k]; if (bars[i].sec !== bars[i - 1].sec && k % 2 === 1) bars[i].sec = bars[i - 1].sec; }
   S.bars = bars;
 }
 
@@ -1200,7 +1395,7 @@ function renderKeys(ev, n, sr) {
 
 /* ---------- Anteprima mixata ---------- */
 async function renderDemo() {
-  const sr = S.sr, g = S.gen, n = S.gtr.length + Math.round(sr * 4);
+  const sr = S.sr, g = S.gen, src = S.gtr || S.vox, n = src.length + Math.round(sr * 4);
   const mixL = new Float32Array(n), mixR = new Float32Array(n), send = new Float32Array(n);
   const addTrack = (st, target, sendDb) => {
     const I = loudness({ sr, ch: st }).I; if (!isFinite(I)) return;
@@ -1213,7 +1408,7 @@ async function renderDemo() {
   if (g.bass.length) { setStatus("Suono il basso…", true); await tick(); let b = renderBass(g.bass, n, sr); b = compAuto(b, sr, { r: 4, a: 10, rl: 120, gr: 3 }); addTrack(pan(b[0], 0), -24, null); }
   if (g.keys.length) { setStatus("Suono le tastiere…", true); await tick(); addTrack(renderKeys(g.keys, n, sr), -30, -12); }
   setStatus("Mixo voce e chitarra…", true); await tick();
-  let gt = [lr4(pad(S.gtr), "hp", 90, sr)]; gt = compAuto(gt, sr, { r: 2.5, a: 15, rl: 150, gr: 2 }); addTrack(pan(gt[0], -0.2), -23, -22);
+  if (S.gtr) { let gt = [lr4(pad(S.gtr), "hp", 90, sr)]; gt = compAuto(gt, sr, { r: 2.5, a: 15, rl: 150, gr: 2 }); addTrack(pan(gt[0], -0.2), -23, -22); }
   if (S.vox) { let v = [lr4(pad(S.vox), "hp", 90, sr)]; v = compAuto(v, sr, { r: 4, a: 3, rl: 60, gr: 4 }); v = compAuto(v, sr, { r: 2, a: 20, rl: 250, gr: 2 }); addTrack(pan(v[0], 0), -19, -14); }
   setStatus("Riverbero…", true); await tick();
   const [vL, vR] = await renderReverb(send, sr, 1.7);
@@ -1222,8 +1417,8 @@ async function renderDemo() {
   const r = await toTarget(mix, sr, -14, -1);
   S.demo = trimEnd(r.ch, sr);
   // originale: voce e chitarra alla stessa durata, per il confronto
-  const oL = new Float32Array(S.demo[0].length); const m = Math.min(oL.length, S.gtr.length);
-  for (let i = 0; i < m; i++) oL[i] = S.gtr[i] * 0.7 + (S.vox && i < S.vox.length ? S.vox[i] * 0.7 : 0);
+  const oL = new Float32Array(S.demo[0].length), m = Math.min(oL.length, src.length);
+  for (let i = 0; i < m; i++) oL[i] = (S.gtr && i < S.gtr.length ? S.gtr[i] * 0.7 : 0) + (S.vox && i < S.vox.length ? S.vox[i] * 0.7 : 0);
   let pk = 0; for (const v of oL) pk = Math.max(pk, Math.abs(v)); for (let i = 0; i < oL.length; i++) oL[i] /= (pk || 1) / 0.9;
   S.orig = [oL, oL];
   S.demoI = loudness({ sr, ch: S.demo }).I; S.origI = loudness({ sr, ch: S.orig }).I;
@@ -1299,6 +1494,12 @@ async function loadAudio(file, which) {
     if (!$("#bpm").value) { $("#bpm").value = estimateBpm(S.F); $("#bpmHint").textContent = "Stimato dalla chitarra: controlla che sia uguale al metronomo di Cubase."; }
   } else {
     S.vox = x; S.voxName = file.name; $("#nameVox").textContent = lab; $("#hintVox").classList.add("hidden"); $("#dropVox").classList.add("loaded");
+    if (!S.gtr) {
+      if (!$("#title").value) $("#title").value = file.name.replace(/\.[^.]+$/, "").replace(/[_-]?(voce|vox|vocal|canto)[_-]?/ig, " ").trim();
+      S.F = await analyzeGuitar(x, S.sr);
+      S.notes = await analyzeMelody(x, S.sr);
+      if (!$("#bpm").value) { $("#bpm").value = estimateBpm(S.F); $("#bpmHint").textContent = "Stimato dalla voce, quindi poco affidabile: inserisci i BPM esatti del metronomo di Cubase."; }
+    }
   }
   if (S.F) await analyze();
   else setStatus("");
@@ -1308,13 +1509,14 @@ async function analyze() {
   if (!S.F || !(bpm >= 40 && bpm <= 240)) { setStatus("Inserisci i BPM del metronomo."); return; }
   S.bpm = bpm; S.beats = +$("#meter").value;
   setStatus("Trovo il tempo e gli accordi…", true); await tick();
-  S.phase = findPhase(S.F, bpm); S.down = findDownbeat(S.F, bpm, S.phase);
+  S.phase = findPhase(S.F, bpm); S.down = S.gtr ? findDownbeat(S.F, bpm, S.phase) : 0;
   buildBars(); S.gen = null; S.sel = -1;
   setStatus(""); renderBars();
 }
 function renderBars() {
   $("#empty").classList.add("hidden"); $("#structPanel").classList.remove("hidden");
-  $("#keyInfo").textContent = `${PC_IT[S.key.r]} ${S.key.minor ? "minore" : "maggiore"}, ${S.bpm} BPM, ${S.bars.filter(b => b.sec !== "vuoto").length} battute`;
+  $("#keyInfo").textContent = `${PC_IT[S.key.r]} ${S.key.minor ? "minore" : "maggiore"}, ${S.bpm} BPM, ${S.bars.filter(b => b.sec !== "vuoto").length} battute${S.gtr ? "" : ", accordi ricavati dalla voce"}`;
+  $("#voxOnly").classList.toggle("hidden", !!S.gtr);
   $("#legendSec").innerHTML = Object.entries(SECT).map(([k, v]) => `<span style="--c:var(${v.c})">${v.label}</span>`).join("");
   $("#bars").innerHTML = S.bars.map((b, i) => {
     const [a, c] = b.chords, same = a && c && a.r === c.r && a.q === c.q;
@@ -1350,17 +1552,20 @@ $("#edClose").addEventListener("click", () => { $("#editor").classList.add("hidd
 const nudge = (ph, dn) => { if (!S.F) return; S.phAdj += ph; S.dnAdj += dn; buildBars(); S.gen = null; renderBars(); };
 $("#nPhL").addEventListener("click", () => nudge(-1, 0)); $("#nPhR").addEventListener("click", () => nudge(1, 0));
 $("#nDnL").addEventListener("click", () => nudge(0, -1)); $("#nDnR").addEventListener("click", () => nudge(0, 1));
-$("#bpm").addEventListener("change", () => { S.phAdj = 0; S.dnAdj = 0; $("#bpmHint").textContent = ""; analyze(); });
+const bpmVal = () => parseFloat(String($("#bpm").value).replace(",", "."));
+$("#bpm").addEventListener("change", () => { if (!S.F || bpmVal() === S.bpm) return; S.phAdj = 0; S.dnAdj = 0; $("#bpmHint").textContent = ""; analyze(); });
 $("#meter").addEventListener("change", () => { S.phAdj = 0; S.dnAdj = 0; analyze(); });
-$("#o7").addEventListener("change", () => { if (S.F) { buildBars(); S.gen = null; renderBars(); } });
+$("#o7").addEventListener("change", () => { if (S.F && S.bpm) { buildBars(); S.gen = null; renderBars(); } });
 
 $("#btnGen").addEventListener("click", async () => {
   if (!S.bars.length) { setStatus("Carica prima la chitarra."); return; }
   const btn = $("#btnGen"); btn.disabled = true; stopPlay();
   try {
+    if (bpmVal() !== S.bpm) { S.phAdj = 0; S.dnAdj = 0; await analyze(); if (!S.bars.length) return; }
     generate();
+    const gen = S.gen;
     await renderDemo();
-    const g = S.gen;
+    const g = gen;
     $("#resultPanel").classList.remove("hidden"); $("#listen").classList.remove("hidden");
     $("#genInfo").textContent = `${g.drums.length} colpi di batteria, ${g.bass.length} note di basso${g.keys.length ? `, ${g.keys.length} note di tastiere` : ""}, ${g.chords.length} cambi di accordo.`;
     pl.bufFor = null; pl.off = 0; updatePos();
