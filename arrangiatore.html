@@ -212,6 +212,18 @@ td.val{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:500}
 .dls{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0 4px}
 .dls .save:first-child{background:var(--ink);color:var(--bg)}
 input[type=number]{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;color:var(--ink);width:100%}
+.refclear{margin-top:8px;border:0;background:transparent;color:var(--muted);font-size:.8rem;text-decoration:underline;cursor:pointer;padding:0}
+.refclear:hover{color:var(--ink)}
+.shared{display:inline-block;margin-left:6px;font-size:.72rem;font-weight:600;padding:1px 7px;border-radius:99px;background:var(--raise);color:var(--muted)}
+
+.ggrid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:12px}
+.glvl b{display:block;margin-bottom:8px;font-weight:600}
+.grow{display:grid;grid-template-columns:84px 1fr;align-items:center;gap:8px;margin:5px 0;font-size:.8rem;color:var(--muted)}
+.gcells{display:grid;grid-template-columns:repeat(16,1fr);gap:3px}
+.gcells i{height:16px;border-radius:4px;background:var(--raise)}
+.gcells i.beat{box-shadow:inset 0 0 0 1px var(--line)}
+.gcells i.on{background:var(--c);box-shadow:none}
+@media (max-width:1000px){.ggrid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -241,6 +253,11 @@ input[type=number]{background:var(--panel);border:1px solid var(--line);border-r
           <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v4"/></svg></span>
           <span><b>Voce</b><small class="file" id="nameVox"></small><small id="hintVox">Col metronomo. Con la chitarra aiuta a trovare le sezioni</small></span>
         </label>
+        <label class="drop ref" id="dropRef">
+          <input type="file" id="fileRef" accept="audio/*,.wav,.flac,.mp3,.m4a,.ogg,.aif,.aiff">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></span>
+          <span><b>Riferimento</b><small class="file" id="nameRef"></small><small id="hintRef">Facoltativo: ne copia il groove</small></span>
+        </label>
       </div>
       <div class="status" id="status" role="status" aria-live="polite"></div>
     </div>
@@ -257,7 +274,7 @@ input[type=number]{background:var(--panel);border:1px solid var(--line);border-r
       <h2>Arrangiamento</h2>
       <div class="fields" style="grid-template-columns:1fr">
         <label>Stile
-          <select id="style"><option value="poprock">Pop-rock</option><option value="indie">Indie, ritmo in avanti</option><option value="ballata">Ballata</option></select>
+          <select id="style"><option value="poprock">Pop-rock</option><option value="indie">Indie, ritmo in avanti</option><option value="ballata">Ballata</option><option value="ref" disabled>Come il riferimento</option></select>
         </label>
       </div>
       <div class="mods" style="margin-top:8px">
@@ -307,6 +324,13 @@ input[type=number]{background:var(--panel);border:1px solid var(--line);border-r
           <div class="edrow"><button class="save" id="edApply" style="background:var(--ink);color:var(--bg)">Applica</button><button class="nb" id="edClose">Chiudi</button></div>
         </div>
         <p class="hint">Clicca una battuta per correggere accordo o sezione. La sezione decide quanto suona la band: intro leggera, strofa media, ritornello piena, stacco ferma.</p>
+      </section>
+
+      <section class="panel hidden" id="groovePanel">
+        <div class="head-row"><h2>Groove del riferimento</h2></div>
+        <p class="muted" id="grooveInfo" style="margin:0"></p>
+        <div class="ggrid" id="grooveGrid"></div>
+        <p class="hint">Queste sono le parti che l'Arrangiatore usa con lo stile "Come il riferimento": le strofe prendono il groove delle parti più tranquille del riferimento, i ritornelli quello delle parti più piene.</p>
       </section>
 
       <section class="panel hidden" id="resultPanel">
@@ -1206,6 +1230,150 @@ function buildBarsVoice() {
   S.bars = bars;
 }
 
+/* ---------- Riferimento condiviso tra gli strumenti (salvato nel browser) ---------- */
+const REFDB = {
+  open() { return new Promise((res, rej) => { const r = indexedDB.open("banco-studio", 1); r.onupgradeneeded = () => r.result.createObjectStore("files"); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); },
+  async put(name, buf) { try { const db = await this.open(); await new Promise((res, rej) => { const tx = db.transaction("files", "readwrite"); tx.objectStore("files").put({ name, buf, t: Date.now() }, "ref"); tx.oncomplete = res; tx.onerror = () => rej(tx.error); }); return true; } catch (e) { return false; } },
+  async get() { try { const db = await this.open(); return await new Promise(res => { const q = db.transaction("files").objectStore("files").get("ref"); q.onsuccess = () => res(q.result || null); q.onerror = () => res(null); }); } catch (e) { return null; } },
+  async del() { try { const db = await this.open(); await new Promise(res => { const tx = db.transaction("files", "readwrite"); tx.objectStore("files").delete("ref"); tx.oncomplete = res; tx.onerror = res; }); } catch (e) {} },
+};
+async function shareRef(file) { try { const buf = await file.arrayBuffer(); await REFDB.put(file.name, buf.slice(0)); } catch (e) {} }
+async function sharedRefFile() { const r = await REFDB.get(); return r ? new File([r.buf], r.name) : null; }
+function refClearButton(afterEl) {
+  const b = document.createElement("button"); b.className = "refclear hidden"; b.id = "refClear"; b.type = "button";
+  b.textContent = "Rimuovi il riferimento da tutti gli strumenti";
+  b.addEventListener("click", async () => { await REFDB.del(); location.reload(); });
+  afterEl.insertAdjacentElement("afterend", b); return b;
+}
+/* ---------- Groove dal riferimento ---------- */
+async function analyzeRefGroove(x, sr) {
+  const hop = 256, P0 = sr / hop;
+  const env = y => {
+    const n = Math.floor(y.length / hop), e = new Float32Array(n), on = new Float32Array(n);
+    for (let k = 0; k < n; k++) { let s = 0; const o = k * hop; for (let i = 0; i < hop; i++) { const v = y[o + i]; s += v * v; } e[k] = 10 * Math.log10(s / hop + 1e-12); }
+    for (let k = 1; k < n; k++) on[k] = Math.max(0, e[k] - e[k - 1]);
+    let m = 0; for (const v of on) m += v; m /= n || 1; for (let k = 0; k < n; k++) on[k] /= m || 1;
+    return { e, on };
+  };
+  setStatus("Analizzo il groove del riferimento…", true); await tick();
+  const kick = env(lr4(lr4(x, "lp", 65, sr), "hp", 25, sr)); await tick();
+  const snB = env(lr4(lr4(x, "hp", 150, sr), "lp", 400, sr)), snN = env(lr4(lr4(x, "hp", 2000, sr), "lp", 5000, sr)); await tick();
+  const hat = env(lr4(x, "hp", 8000, sr)); await tick();
+  const bas = env(lr4(lr4(x, "hp", 60, sr), "lp", 250, sr)); await tick();
+  const full = env(x), n = full.on.length;
+  // rullante: serve sia il corpo (150-400 Hz) sia il rumore (2-5 kHz), così i piatti non vengono scambiati per rullante
+  const sn = new Float32Array(n); for (let k = 0; k < n; k++) sn[k] = Math.sqrt(snB.on[k] * snN.on[k]);
+  // cassa: attacco nelle frequenze più basse, pesato da quanto il sub domina sulla zona del basso
+  const bas0 = env(lr4(lr4(x, "hp", 80, sr), "lp", 250, sr));
+  const kw = k => Math.max(0, Math.min(1.5, (kick.e[Math.min(n - 1, k + 3)] - bas0.e[Math.min(n - 1, k + 3)] + 10) / 10));
+  const sw_ = k => Math.max(0, Math.min(1.3, (snB.e[Math.min(n - 1, k + 3)] - kick.e[Math.min(n - 1, k + 3)] + 15) / 12));
+  for (let k = 0; k < n; k++) { const a = kick.on[k] * kw(k), b = sn[k] * sw_(k); kick.on[k] = a; sn[k] = b; }
+  const all = new Float32Array(n); for (let k = 0; k < n; k++) all[k] = kick.on[k] + sn[k] + 0.6 * hat.on[k];
+  const at = (a, t, w = 0.02) => { const c = Math.round(t * P0), r = Math.round(w * P0); let m = 0; for (let k = c - r; k <= c + r; k++) if (k >= 0 && k < n) m = Math.max(m, a[k]); return m; };
+  const dur = x.length / sr;
+  // tempo: autocorrelazione, poi affinamento fine con la fase
+  const ac = lag => { const L = Math.floor(lag), fr = lag - L; let s = 0; for (let i = 0; i + L + 1 < n; i++) s += all[i] * (all[i + L] * (1 - fr) + all[i + L + 1] * fr); return s; };
+  let bpm = 120, bs = -Infinity;
+  for (let b = 70; b <= 180; b += 0.5) { const lag = 60 / b * P0, sc = (ac(lag) + 0.5 * ac(2 * lag)) * (b <= 165 ? 1 : 0.9); if (sc > bs) { bs = sc; bpm = b; } }
+  let best = { bpm, ph: 0, sc: -1 };
+  for (let b = bpm - 0.6; b <= bpm + 0.6; b += 0.05) {
+    const P = 60 / b;
+    for (let k = 0; k < 48; k++) { const ph = k * P / 48; let s = 0; for (let t = ph; t < dur; t += P) s += at(all, t, 0.015); if (s > best.sc) best = { bpm: b, ph, sc: s }; }
+    if ((b * 100 | 0) % 20 === 0) await tick();
+  }
+  // i riferimenti hanno quasi sempre un tempo intero: se ci siamo vicini lo arrotondo e ricalcolo la fase
+  if (Math.abs(best.bpm - Math.round(best.bpm)) < 0.2) {
+    const b = Math.round(best.bpm), Pb = 60 / b; let bp = 0, bsc = -1;
+    for (let k = 0; k < 96; k++) { const ph = k * Pb / 96; let s = 0; for (let t = ph; t < dur; t += Pb) s += at(all, t, 0.015); if (s > bsc) { bsc = s; bp = ph; } }
+    best = { bpm: b, ph: bp, sc: bsc };
+  }
+  const P = 60 / best.bpm, bl = 4 * P;
+  // battere: cassa e basso sull'1, rullante sul 2 e sul 4
+  let down = 0, ds = -Infinity;
+  for (let d = 0; d < 4; d++) {
+    let s = 0;
+    for (let t = best.ph + d * P; t + bl < dur; t += bl) s += at(kick.on, t) + 0.5 * at(bas.on, t) - at(sn, t) + at(sn, t + P) + at(sn, t + 3 * P) - 0.5 * at(sn, t + 2 * P);
+    if (s > ds) { ds = s; down = d; }
+  }
+  const bars = []; for (let t = best.ph + down * P; t + bl <= dur; t += bl) bars.push(t);
+  const grid = (a, t0) => { const v = new Float64Array(16); for (let p = 0; p < 16; p++) v[p] = at(a, t0 + p * P / 4); return v; };
+  const rows = bars.map(t0 => ({ k: grid(kick.on, t0), s: grid(sn, t0), h: grid(hat.on, t0), b: grid(bas.on, t0), e: (() => { let s = 0, c = 0; for (let k = Math.round(t0 * P0); k < Math.round((t0 + bl) * P0) && k < n; k++) { s += Math.pow(10, full.e[k] / 10); c++; } return 10 * Math.log10(s / Math.max(1, c) + 1e-12); })() }));
+  // due livelli di energia: le parti più piene del riferimento diventano il modello dei ritornelli
+  const es = rows.map(r => r.e).sort((a, b) => a - b), emax = es[es.length - 1] ?? 0;
+  const q25 = es[Math.floor(es.length * 0.25)] ?? 0, q85 = es[Math.floor(es.length * 0.85)] ?? 0, thr = (q25 + q85) / 2, split = q85 - q25 > 2.5;
+  const lvlRows = { 1: rows.filter(r => r.e > emax - 25 && (!split || r.e <= thr)), 2: rows.filter(r => r.e > emax - 25 && (!split || r.e > thr)) };
+  if (!lvlRows[1].length) lvlRows[1] = lvlRows[2]; if (!lvlRows[2].length) lvlRows[2] = lvlRows[1];
+  const avg = (rs, key) => { const v = new Float64Array(16); rs.forEach(r => { for (let p = 0; p < 16; p++) v[p] += r[key][p]; }); return v.map(x => x / Math.max(1, rs.length)); };
+  const levels = {};
+  for (const L of [1, 2]) {
+    const K_ = avg(lvlRows[L], "k"), S_ = avg(lvlRows[L], "s"), H_ = avg(lvlRows[L], "h"), B_ = avg(lvlRows[L], "b");
+    const mk = Math.max(...K_), ms = Math.max(...S_), mb = Math.max(...B_);
+    // un colpo c'è se spicca sul massimo e sulla "coda" della posizione precedente (i colpi ravvicinati hanno attacchi più deboli)
+    const hit = (V, p, m, rel) => V[p] >= rel * m && V[p] > 1.5 * V[(p + 15) % 16];
+    let kickP = []; for (let p = 0; p < 16; p++) if (hit(K_, p, mk, 0.3)) kickP.push([p, Math.round(80 + 35 * Math.min(1, K_[p] / mk * 1.5))]);
+    if (!kickP.some(k => k[0] === 0)) kickP.unshift([0, 105]);
+    let snP = [], ghost = [];
+    for (let p = 0; p < 16; p++) { if (hit(S_, p, ms, 0.5)) snP.push([p, Math.round(98 + 18 * Math.min(1, S_[p] / ms * 1.5))]); }
+    if (!snP.length || snP.length > 6) snP = [[4, 108], [12, 110]];
+    const q = [0, 4, 8, 12].reduce((s, p) => s + H_[p], 0) / 4, e8 = [2, 6, 10, 14].reduce((s, p) => s + H_[p], 0) / 4, s16 = [1, 3, 5, 7, 9, 11, 13, 15].reduce((s, p) => s + H_[p], 0) / 8;
+    const hatGrid = s16 > 0.5 * Math.max(q, e8) ? 16 : e8 > 0.4 * q ? 8 : 4;
+    let bassP = []; for (let p = 0; p < 16; p++) if (B_[p] >= 0.45 * mb) bassP.push(p);
+    kickP.forEach(([p]) => { if (!bassP.includes(p)) bassP.push(p); }); bassP.sort((a, b) => a - b);
+    if (bassP.length >= 7) bassP = [0, 2, 4, 6, 8, 10, 12, 14];
+    levels[L] = { kick: kickP, snare: snP, ghost, hatGrid, bass: bassP };
+  }
+  // swing: quanto arrivano in ritardo i contrattempi del charleston
+  const offs = [];
+  for (const t0 of bars) for (const p of [2, 6, 10, 14]) {
+    const t = t0 + p * P / 4, c = Math.round(t * P0), r0 = Math.round(-0.08 * P * P0), r1 = Math.round(0.28 * P * P0);
+    let bk = c, bv = 0; for (let k = c + r0; k <= c + r1; k++) if (k >= 0 && k < n && hat.on[k] > bv) { bv = hat.on[k]; bk = k; }
+    if (bv > 2) offs.push((bk - c) / P0 / P);
+  }
+  offs.sort((a, b) => a - b);
+  const med = offs.length > 8 ? offs[offs.length >> 1] : 0, swing = med > 0.06 ? Math.min(0.2, med) : 0;
+  return { bpm: Math.round(best.bpm * 10) / 10, levels, swing, bars: bars.length };
+}
+function refPattern(lvl) {
+  const g = S.groove, L = g.levels[lvl === 2 ? 2 : 1], out = [];
+  if (lvl === 0) { out.push([0, K, 88]); [0, 4, 8, 12].forEach(p => out.push([p, HH, 58])); return out; }
+  L.kick.forEach(([p, v]) => out.push([p, K, v]));
+  L.snare.forEach(([p, v]) => out.push([p, SN, v]));
+  L.ghost.forEach(p => out.push([p, SN, 28, 0.7]));
+  const step = 16 / L.hatGrid;
+  for (let p = 0; p < 16; p += step) out.push([p, HH, p % 4 === 0 ? (lvl === 2 ? 94 : 82) : p % 2 === 0 ? (lvl === 2 ? 72 : 60) : 50]);
+  return out;
+}
+function renderGroove() {
+  const g = S.groove, box = $("#groovePanel");
+  if (!g) { box.classList.add("hidden"); return; }
+  box.classList.remove("hidden");
+  const hatTxt = { 4: "charleston in quarti", 8: "charleston in ottavi", 16: "charleston in sedicesimi" };
+  $("#grooveInfo").textContent = `Riferimento a circa ${f(g.bpm, 1)} BPM, ${hatTxt[g.levels[1].hatGrid]}${g.swing ? ", swing leggero" : ", ritmo dritto"}. Il groove viene adattato al tempo del tuo brano.`;
+  const row = (label, cells, c) => `<div class="grow"><span>${label}</span><div class="gcells">${cells.map((v, p) => `<i class="${v ? "on" : ""}${p % 4 === 0 ? " beat" : ""}" style="--c:var(${c});opacity:${v ? 0.35 + 0.65 * v : 1}"></i>`).join("")}</div></div>`;
+  const lvlHtml = (lvl, name) => {
+    const L = g.levels[lvl], k = new Array(16).fill(0), s = new Array(16).fill(0), h = new Array(16).fill(0), b = new Array(16).fill(0);
+    L.kick.forEach(([p, v]) => k[p] = v / 127); L.snare.forEach(([p, v]) => s[p] = v / 127); L.ghost.forEach(p => s[p] = Math.max(s[p], 0.25));
+    for (let p = 0; p < 16; p += 16 / L.hatGrid) h[p] = p % 4 === 0 ? 0.9 : 0.6; L.bass.forEach(p => b[p] = 0.8);
+    return `<div class="glvl"><b>${name}</b>${row("Cassa", k, "--s1")}${row("Rullante", s, "--s2")}${row("Charleston", h, "--s4")}${row("Basso", b, "--s3")}</div>`;
+  };
+  $("#grooveGrid").innerHTML = lvlHtml(1, "Strofa") + lvlHtml(2, "Ritornello");
+}
+async function loadRefGroove(file, fromShared = false) {
+  if (!file) return;
+  setStatus(`Apro ${file.name}…`, true); await tick();
+  let ab;
+  try { ab = await ctx().decodeAudioData(await file.arrayBuffer()); }
+  catch (e) { setStatus(`${file.name} non si apre nel browser: esportalo in WAV o MP3.`); return; }
+  const x = ab.getChannelData(0).slice(); if (ab.numberOfChannels > 1) { const r = ab.getChannelData(1); for (let i = 0; i < x.length; i++) x[i] = (x[i] + r[i]) * 0.5; }
+  S.groove = await analyzeRefGroove(x, ab.sampleRate);
+  $("#nameRef").innerHTML = `${esc(file.name)} (${fmtTime(ab.duration)}) <span class="shared">condiviso</span>`; $("#hintRef").classList.add("hidden"); $("#dropRef").classList.add("loaded");
+  $("#refClear").classList.remove("hidden");
+  $("#style option[value=ref]").disabled = false; $("#style").value = "ref";
+  if (!fromShared) shareRef(file);
+  S.gen = null; renderGroove(); setStatus("");
+}
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
 /* ---------- Generazione dell'arrangiamento ---------- */
 const K = 36, SN = 38, SS = 37, HH = 42, PH = 44, OH = 46, CR = 49, RD = 51, T1 = 48, T2 = 47, T3 = 43;
 const hats8 = (note, on, off) => [0, 2, 4, 6, 8, 10, 12, 14].map(p => [p, note, p % 4 === 0 ? on : off]);
@@ -1246,7 +1414,8 @@ function generate() {
   const useD = $("#oDrums").checked, useB = $("#oBass").checked, useK = $("#oKeys").checked;
   const P = 60 / S.bpm, s16 = P / 4, r = rng(1234), bars = S.bars;
   const drums = [], bass = [], keys = [], chords = [], markers = [], chordTxt = [];
-  const at = (bar, pos) => bar.t0 + pos * s16;
+  const sw = style === "ref" && S.groove ? S.groove.swing * P : 0;
+  const at = (bar, pos) => bar.t0 + pos * s16 + (pos % 4 === 2 ? sw : pos % 2 === 1 ? sw / 2 : 0);
   const hT = (sdMs, bias = 0) => (gauss(r) * sdMs * hum + bias * hum) / 1000;
   const hV = v => Math.max(1, Math.min(127, Math.round(v + gauss(r) * 9 * hum)));
   let prevVoicing = null, lastSec = null, lastChord = null, lastPlayed = -1;
@@ -1265,7 +1434,7 @@ function generate() {
       const fill = fills && willChange && lvl >= 0;
       if (lvl === -1) { drums.push({ t: at(bar, 0), n: CR, v: hV(110), d: s16 }, { t: at(bar, 0), n: K, v: hV(110), d: s16 }); }
       else {
-        const pat = PAT[style][lvl];
+        const pat = style === "ref" && S.groove ? refPattern(lvl) : PAT[style][lvl];
         for (const [p, n, v, prob] of pat) {
           if (fill && p >= 8) continue;
           if (prob !== undefined && r() > prob * (0.4 + 0.6 * hum)) continue;
@@ -1289,7 +1458,15 @@ function generate() {
         const push = (p, len, note, v) => bass.push({ t: at(bar, p) + hT(5), n: note, v: hV(v), d: Math.max(s16, len * s16 * 0.9) });
         if (lvl === -1) { push(sg.p0, 4, root, 105); return; }
         if (lvl === 0) { push(sg.p0, sg.p1 - sg.p0, root, 88); return; }
-        if (style === "ballata") {
+        if (style === "ref" && S.groove) {
+          const pos = S.groove.levels[lvl === 2 ? 2 : 1].bass.filter(p => p >= sg.p0 && p < sg.p1);
+          if (!pos.length || pos[0] !== sg.p0) pos.unshift(sg.p0);
+          pos.forEach((p, k) => {
+            const end = k + 1 < pos.length ? pos[k + 1] : sg.p1;
+            const note = lvl === 2 && k === pos.length - 1 && k > 0 && nextC && nextC.r !== sg.c.r && end - p <= 4 ? bassNote(nextC.r) - 1 : root;
+            push(p, end - p, note, p % 4 === 0 ? 100 : 86);
+          });
+        } else if (style === "ballata") {
           if (lvl === 1) { push(sg.p0, Math.min(6, sg.p1 - sg.p0), root, 92); if (sg.p1 - sg.p0 >= 16) push(12, 4, root, 84); else push(sg.p0 + 6, 2, root, 80); }
           else for (let p = sg.p0; p < sg.p1; p += 4) push(p, 4, p === sg.p0 ? root : (p === sg.p1 - 4 && nextC && nextC.r !== sg.c.r ? bassNote(nextC.r) - 1 : root), p === sg.p0 ? 100 : 86);
         } else {
@@ -1630,7 +1807,14 @@ function wire(dropSel, inputSel, which) {
   d.addEventListener("dragleave", () => d.classList.remove("over"));
   d.addEventListener("drop", e => { e.preventDefault(); d.classList.remove("over"); loadAudio(e.dataTransfer.files[0], which); });
 }
-wire("#dropGtr", "#fileGtr", "gtr"); wire("#dropVox", "#fileVox", "vox"); wire("#empty", null, "gtr");
+wire("#dropGtr", "#fileGtr", "gtr");
+{ const d = $("#dropRef");
+  $("#fileRef").addEventListener("change", e => loadRefGroove(e.target.files[0]));
+  d.addEventListener("dragover", e => { e.preventDefault(); d.classList.add("over"); });
+  d.addEventListener("dragleave", () => d.classList.remove("over"));
+  d.addEventListener("drop", e => { e.preventDefault(); d.classList.remove("over"); loadRefGroove(e.dataTransfer.files[0]); }); }
+refClearButton($("#dropRef"));
+(async () => { const f = await sharedRefFile(); if (f) loadRefGroove(f, true); })(); wire("#dropVox", "#fileVox", "vox"); wire("#empty", null, "gtr");
 window.addEventListener("dragover", e => e.preventDefault());
 window.addEventListener("drop", e => e.preventDefault());
 
