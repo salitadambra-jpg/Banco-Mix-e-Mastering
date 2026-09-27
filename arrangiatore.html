@@ -308,8 +308,10 @@ input[type=number]{background:var(--panel);border:1px solid var(--line);border-r
       <div class="mods" style="margin-top:8px">
         <div class="mod"><label class="tog"><input type="checkbox" id="oDrums" checked><span class="sw"></span>Batteria</label></div>
         <div class="mod"><label class="tog"><input type="checkbox" id="oBass" checked><span class="sw"></span>Basso</label></div>
-        <div class="mod"><label class="tog"><input type="checkbox" id="oKeys"><span class="sw"></span>Tastiere (pad)</label></div>
+        <div class="mod"><label class="tog"><input type="checkbox" id="oKeys"><span class="sw"></span>Tastiere</label>
+          <div class="inline-sel">suonate da <select id="keysInst" aria-label="Strumento delle tastiere"><option value="pianoforte">pianoforte</option><option value="piano-elettrico">piano elettrico</option><option value="pad">pad</option><option value="organo">organo</option></select></div></div>
         <div class="mod"><label class="tog"><input type="checkbox" id="oFill" checked><span class="sw"></span>Fill nei cambi di sezione</label></div>
+        <div class="mod"><div class="inline-sel" style="margin-left:0">Suoni dell'anteprima <select id="sounds" aria-label="Suoni dell'anteprima"><option value="real">campioni reali</option><option value="synth">sintetici, più leggeri</option></select></div><p class="hint" id="soundsNote"></p></div>
         <div class="mod"><div class="sl" style="margin-left:0">Umanizzazione <input type="range" id="hum" min="0" max="100" value="60" aria-label="Umanizzazione"><span class="num" id="humV">60%</span></div></div>
       </div>
     </div>
@@ -369,7 +371,7 @@ input[type=number]{background:var(--panel);border:1px solid var(--line);border-r
           <button class="save" id="dlChords">Scarica gli accordi</button>
           <button class="save" id="dlDemo">Scarica la demo</button>
         </div>
-        <p class="hint">La demo usa suoni di anteprima: serve a giudicare l'arrangiamento. Il suono vero lo danno gli strumenti di Cubase.</p>
+        <p class="hint">La demo usa campioni reali per giudicare l'arrangiamento; il suono definitivo lo danno gli strumenti di Cubase. Campioni: Fluid R3 GM di Frank Wen, licenza MIT.</p>
         <ol class="steps">
           <li>In Cubase, con il progetto allo stesso tempo, usa <b>File → Importa → File MIDI</b>: arrivano le tracce Batteria, Basso, Tastiere e Accordi, più i marker delle sezioni.</li>
           <li>Assegna la <b>Batteria</b> a Groove Agent SE (incluso in Cubase) o a un altro strumento di batteria: le note seguono la mappa standard General MIDI.</li>
@@ -907,6 +909,7 @@ const SECT = {
   ritornello: { label: "Ritornello", c: "--s1", lvl: 2 },
   stacco: { label: "Stacco", c: "--s2", lvl: -1 },
   outro: { label: "Outro", c: "--s5", lvl: 1 },
+  bridge: { label: "Bridge", c: "--muted", lvl: 3 },
 };
 
 /* ---------- Analisi spettrale della chitarra ---------- */
@@ -1439,95 +1442,202 @@ function voicing(c, prev) {
 }
 function generate() {
   const style = $("#style").value, hum = +$("#hum").value / 100, fills = $("#oFill").checked;
-  const useD = $("#oDrums").checked, useB = $("#oBass").checked, useK = $("#oKeys").checked;
+  const useD = $("#oDrums").checked, useB = $("#oBass").checked, useK = $("#oKeys").checked, kInst = $("#keysInst").value;
   const P = 60 / S.bpm, s16 = P / 4, r = rng(1234), bars = S.bars;
   const drums = [], bass = [], keys = [], chords = [], markers = [], chordTxt = [];
   const sw = style === "ref" && S.groove ? S.groove.swing * P : 0;
   const at = (bar, pos) => bar.t0 + pos * s16 + (pos % 4 === 2 ? sw : pos % 2 === 1 ? sw / 2 : 0);
   const hT = (sdMs, bias = 0) => (gauss(r) * sdMs * hum + bias * hum) / 1000;
-  const hV = v => Math.max(1, Math.min(127, Math.round(v + gauss(r) * 9 * hum)));
-  let prevVoicing = null, lastSec = null, lastChord = null, lastPlayed = -1;
+  const hV = v => Math.max(1, Math.min(127, Math.round(v + gauss(r) * 8 * hum)));
+  const D = (bar, p, n, v, len = 1) => drums.push({ t: at(bar, p) + hT(n === K ? 3 : n === SN ? 5 : 6, n === SN ? 4 : 0), n, v: hV(v), d: s16 * len });
+  // posizione di ogni battuta dentro la sua sezione e la sua frase di 4/8 battute
+  const secStart = []; bars.forEach((b, i) => secStart.push(i > 0 && bars[i - 1].sec === b.sec ? secStart[i - 1] : i));
+  const secLen = i => { let j = i; while (j + 1 < bars.length && bars[j + 1].sec === bars[i].sec) j++; return j - secStart[i] + 1; };
+  // accenti della chitarra, battuta per battuta, per far suonare il basso "con" la chitarra
+  const gAcc = bar => { if (!S.gtr || !S.F) return null; const v = []; for (let p = 0; p < 16; p++) v.push(onsetAt(S.F, bar.t0 + p * s16)); const m = Math.max(...v); return m > 0 ? v.map(x => x / m) : null; };
+  let prevVoicing = null, lastSec = null, lastChord = null, lastPlayed = -1, fillN = 0;
   bars.forEach((bar, i) => {
-    const sec = bar.sec, lvl = SECT[sec].lvl, next = bars[i + 1];
+    const sec = bar.sec, lvl = SECT[sec].lvl, next = bars[i + 1], nextSec = next ? next.sec : null;
     if (sec !== lastSec && sec !== "vuoto") markers.push({ t: Math.max(0, bar.t0), text: SECT[sec].label });
     const newSec = sec !== lastSec; lastSec = sec;
     if (lvl === null) return;
     lastPlayed = i;
+    const k = i - secStart[i], len = secLen(i), ph = k % 4, ph8 = k % 8, lastOfSec = k === len - 1;
     const segs = segmentsOf(bar);
     segs.forEach(sg => { if (sg.c) { chords.push({ t: at(bar, sg.p0), d: (sg.p1 - sg.p0) * s16, c: sg.c }); lastChord = sg.c; } });
     chordTxt.push({ bar: i + 1, sec, chords: bar.chords });
-    // batteria
+    const intoChorus = nextSec === "ritornello" && sec !== "ritornello" && lvl >= 0;
+    const willChange = next && nextSec !== sec && SECT[nextSec].lvl !== null && lvl >= 0;
+    const half = lvl === 3; // bridge: metà tempo
+    const L = half ? 1 : lvl;
+
+    /* ---- batteria ---- */
     if (useD) {
-      const willChange = next && next.sec !== sec && SECT[next.sec].lvl !== null && lvl >= 0;
-      const fill = fills && willChange && lvl >= 0;
-      if (lvl === -1) { drums.push({ t: at(bar, 0), n: CR, v: hV(110), d: s16 }, { t: at(bar, 0), n: K, v: hV(110), d: s16 }); }
+      let cut = 16; // da dove parte un fill o un crescendo
+      if (lvl === -1) { D(bar, 0, CR, 112, 8); D(bar, 0, K, 110); }
       else {
-        const pat = style === "ref" && S.groove ? refPattern(lvl) : PAT[style][lvl];
+        // variante A/B dentro la frase, per non ripetere sempre la stessa battuta
+        let pat = style === "ref" && S.groove ? refPattern(L) : groovePat(style, L, ph % 2 === 1, half);
+        if (fills && willChange && !intoChorus) cut = 8;
+        else if (intoChorus && lastOfSec) cut = 8;
+        else if (fills && ph8 === 7 && len > 4) cut = 12;
+        else if (fills && ph === 3 && r() < 0.45) cut = 14;
         for (const [p, n, v, prob] of pat) {
-          if (fill && p >= 8) continue;
+          if (p >= cut) continue;
           if (prob !== undefined && r() > prob * (0.4 + 0.6 * hum)) continue;
-          const late = n === SN ? 4 : 0;
-          drums.push({ t: at(bar, p) + hT(n === K ? 4 : 6, late), n, v: hV(v * (p % 4 === 0 ? 1 : 0.97)), d: s16 });
+          D(bar, p, n, v * (p % 4 === 0 ? 1 : 0.96));
         }
-        if (lvl >= 1 && (i % 4 === 3) && style === "poprock" && !fill) drums.push({ t: at(bar, 14) + hT(4), n: K, v: hV(80), d: s16 });
-        if (newSec && lvl >= 1) drums.push({ t: at(bar, 0) + hT(3), n: CR, v: hV(lvl === 2 ? 112 : 98), d: s16 * 4 });
-        if (fill) {
-          const seq = style === "ballata" ? [[8, SN], [10, SN], [12, T1], [13, T2], [14, T3], [15, T3]] : [[8, SN], [9, SN], [10, T1], [11, T1], [12, T2], [13, T2], [14, T3], [15, T3]];
-          seq.forEach(([p, n], k) => drums.push({ t: at(bar, p) + hT(5), n, v: hV(72 + k * 5), d: s16 }));
-          drums.push({ t: at(bar, 8) + hT(4), n: K, v: hV(96), d: s16 }, { t: at(bar, 12) + hT(4), n: K, v: hV(90), d: s16 });
+        // charleston che si apre sul "e" del 4 a metà frase
+        if (L >= 1 && ph === 1 && cut > 14 && style !== "ballata") { const hi = drums.findIndex(e => e.n === HH && Math.abs(e.t - at(bar, 14)) < s16 / 2); if (hi >= 0) drums.splice(hi, 1); D(bar, 14, OH, 82, 2); }
+        if (newSec && L >= 1) D(bar, 0, CR, L === 2 ? 114 : 100, 8);
+        else if (sec === "ritornello" && ph8 === 0 && k > 0) D(bar, 0, CR, 104, 8);
+        if (cut < 16) {
+          if (intoChorus && lastOfSec) { // crescendo di rullante verso il ritornello
+            [8, 10, 12, 13, 14, 15].forEach((p, j) => D(bar, p, SN, 70 + j * 8)); D(bar, 8, K, 96); D(bar, 12, K, 100);
+          } else FILLS(cut, fillN++, style).forEach(([p, n, v]) => D(bar, p, n, v));
         }
       }
     }
-    // basso
+
+    /* ---- basso ---- */
     if (useB) {
+      const acc = gAcc(bar);
       segs.forEach((sg, si) => {
         if (!sg.c) return;
-        const root = bassNote(sg.c.r), nextSeg = segs[si + 1] || (next && segmentsOf(next)[0]), nextC = nextSeg && nextSeg.c;
-        const push = (p, len, note, v) => bass.push({ t: at(bar, p) + hT(5), n: note, v: hV(v), d: Math.max(s16, len * s16 * 0.9) });
-        if (lvl === -1) { push(sg.p0, 4, root, 105); return; }
-        if (lvl === 0) { push(sg.p0, sg.p1 - sg.p0, root, 88); return; }
-        if (style === "ref" && S.groove) {
-          const pos = S.groove.levels[lvl === 2 ? 2 : 1].bass.filter(p => p >= sg.p0 && p < sg.p1);
-          if (!pos.length || pos[0] !== sg.p0) pos.unshift(sg.p0);
-          pos.forEach((p, k) => {
-            const end = k + 1 < pos.length ? pos[k + 1] : sg.p1;
-            const note = lvl === 2 && k === pos.length - 1 && k > 0 && nextC && nextC.r !== sg.c.r && end - p <= 4 ? bassNote(nextC.r) - 1 : root;
-            push(p, end - p, note, p % 4 === 0 ? 100 : 86);
-          });
-        } else if (style === "ballata") {
-          if (lvl === 1) { push(sg.p0, Math.min(6, sg.p1 - sg.p0), root, 92); if (sg.p1 - sg.p0 >= 16) push(12, 4, root, 84); else push(sg.p0 + 6, 2, root, 80); }
-          else for (let p = sg.p0; p < sg.p1; p += 4) push(p, 4, p === sg.p0 ? root : (p === sg.p1 - 4 && nextC && nextC.r !== sg.c.r ? bassNote(nextC.r) - 1 : root), p === sg.p0 ? 100 : 86);
-        } else {
-          for (let p = sg.p0; p < sg.p1; p += 2) {
-            let note = root, v = p % 4 === 0 ? 96 : 84;
-            if (lvl === 2 && style === "indie" && p % 4 === 2) note = root + 12;
-            if (lvl === 2 && style === "poprock" && p === sg.p0 + 6 && sg.p1 - sg.p0 >= 8) note = root + 7 > 45 ? root - 5 : root + 7;
-            if (lvl === 2 && p === sg.p1 - 2 && nextC && nextC.r !== sg.c.r) note = bassNote(nextC.r) - 1;
-            push(p, 2, note, lvl === 2 ? v + 8 : v);
-          }
-        }
+        const root = bassNote(sg.c.r), q = QUAL[sg.c.q], fifth = root + 7 > 45 ? root - 5 : root + 7, third = root + q[1];
+        const nextSeg = segs[si + 1] || (next && segmentsOf(next)[0]), nextC = nextSeg && nextSeg.c, change = nextC && nextC.r !== sg.c.r;
+        const push = (p, l, note, v) => { if (p >= sg.p1) return; bass.push({ t: at(bar, p) + hT(4), n: note, v: hV(v), d: Math.max(s16, Math.min(l, sg.p1 - p) * s16 * 0.92) }); };
+        const approach = () => { if (!change) return root; const tgt = bassNote(nextC.r), up = tgt >= root; return up ? tgt - 1 : tgt + 1; };
+        if (lvl === -1) { push(sg.p0, 4, root, 106); return; }
+        if (L === 0 || half) { push(sg.p0, sg.p1 - sg.p0, root, 88); if (half && sg.p1 - sg.p0 >= 16) push(10, 6, fifth, 80); return; }
+        let pos;
+        if (style === "ref" && S.groove) pos = S.groove.levels[L].bass.filter(p => p >= sg.p0 && p < sg.p1);
+        else if (style === "ballata") pos = L === 1 ? [0, 6, 8, 12].filter(p => p >= sg.p0 && p < sg.p1) : [0, 4, 8, 10, 12, 14].filter(p => p >= sg.p0 && p < sg.p1);
+        else pos = [];
+        if (!pos.length) { pos = []; for (let p = sg.p0; p < sg.p1; p += 2) pos.push(p); }
+        // segue gli accenti della chitarra sui sedicesimi "in levare" più marcati
+        if (acc && style !== "indie") for (let p = sg.p0 + 1; p < sg.p1; p += 2) if (acc[p] > 0.75 && !pos.includes(p)) pos.push(p);
+        pos.sort((a, b) => a - b); if (pos[0] !== sg.p0) pos.unshift(sg.p0);
+        pos.forEach((p, j) => {
+          const end = j + 1 < pos.length ? pos[j + 1] : sg.p1, last = j === pos.length - 1;
+          let note = root, v = p % 4 === 0 ? 100 : 86;
+          if (L === 2 && style === "poprock" && p === sg.p0 + 6 && sg.p1 - sg.p0 >= 8) note = fifth;
+          if (L === 2 && style === "indie" && p % 4 === 2) note = root + 12;
+          if (style === "ballata" && p === 12 && L === 1) note = fifth;
+          if (style === "ballata" && L === 2 && p === sg.p0 + 8) note = third <= 45 ? third : fifth;
+          if (last && change && (L === 2 || ph === 3) && end - p <= 4) note = approach();
+          push(p, end - p, note, L === 2 ? v + 6 : v);
+        });
       });
     }
-    // tastiere
+
+    /* ---- tastiere ---- */
     if (useK) {
-      const play = lvl === 2 || (style === "ballata" && lvl >= 0) || (lvl === 0 && style !== "indie");
+      const sustained = kInst === "pad" || kInst === "organo";
+      const play = sustained ? (L >= 1 || style === "ballata") : (L >= 1 || (L === 0 && style !== "indie"));
       segs.forEach(sg => {
-        if (!sg.c || !play) return;
+        if (!sg.c || !play || lvl === -1) return;
         const vc = voicing(sg.c, prevVoicing); prevVoicing = vc;
-        vc.forEach(n => keys.push({ t: at(bar, sg.p0) + hT(8), n, v: hV(lvl === 2 ? 68 : 56), d: (sg.p1 - sg.p0) * s16 * 0.98 }));
+        const lh = bassNote(sg.c.r) + 12, dur = sg.p1 - sg.p0, vel = L === 2 ? 72 : 58;
+        const chord = (p, l, v, withLH) => { if (p >= sg.p1) return; vc.forEach((n, j) => keys.push({ t: at(bar, p) + hT(6) + j * 0.004 * hum, n, v: hV(v), d: Math.min(l, sg.p1 - p) * s16 * 0.95 })); if (withLH) keys.push({ t: at(bar, p) + hT(5), n: lh, v: hV(v - 6), d: Math.min(l, sg.p1 - p) * s16 * 0.95 }); };
+        if (sustained || L === 0 || half) { chord(sg.p0, dur, vel - 4, !sustained); return; }
+        if (style === "ballata") { // arpeggio: basso della mano sinistra e note dell'accordo a ottavi
+          const arp = [lh, vc[0], vc[1], vc[2] || vc[0] + 12, vc[1], vc[0], vc[2] || vc[1], vc[1]];
+          for (let p = sg.p0, j = 0; p < sg.p1; p += 2, j++) keys.push({ t: at(bar, p) + hT(6), n: arp[j % arp.length], v: hV(p % 4 === 0 ? vel : vel - 10), d: s16 * 3 });
+          if (L === 2) chord(sg.p0, dur, vel - 12, false);
+        } else if (style === "indie") { for (let p = sg.p0 + 2; p < sg.p1; p += 4) chord(p, 1.5, vel, false); if (L === 2) chord(sg.p0, 2, vel + 4, true); }
+        else if (L === 1) { chord(sg.p0, Math.min(8, dur), vel, true); if (dur >= 16) chord(8, 8, vel - 6, false); }
+        else for (let p = sg.p0; p < sg.p1; p += 2) chord(p, 1.6, p % 4 === 0 ? vel + 4 : vel - 8, p % 8 === 0);
       });
     }
   });
-  // colpo finale
   if (lastPlayed >= 0) {
     const endT = bars[lastPlayed].t1;
-    if (useD) drums.push({ t: endT, n: CR, v: 115, d: s16 * 8 }, { t: endT, n: K, v: 112, d: s16 });
-    if (useB && lastChord) bass.push({ t: endT, n: bassNote(lastChord.r), v: 105, d: P * 3 });
-    if (useK && lastChord) voicing(lastChord, prevVoicing).forEach(n => keys.push({ t: endT, n, v: 64, d: P * 4 }));
+    if (useD) drums.push({ t: endT, n: CR, v: 116, d: s16 * 8 }, { t: endT, n: K, v: 112, d: s16 });
+    if (useB && lastChord) bass.push({ t: endT, n: bassNote(lastChord.r), v: 106, d: P * 3 });
+    if (useK && lastChord) voicing(lastChord, prevVoicing).forEach(n => keys.push({ t: endT, n, v: 66, d: P * 4 }));
     if (lastChord) chords.push({ t: endT, d: P * 4, c: lastChord });
   }
-  S.gen = { drums: drums.filter(e => e.t >= 0), bass: bass.filter(e => e.t >= 0), keys: keys.filter(e => e.t >= 0), chords: chords.filter(e => e.t >= 0), markers, chordTxt, style };
+  // un solo colpo per strumento nello stesso istante (evita doppioni tra groove e fill)
+  const seen = new Set(), dd = drums.filter(e => e.t >= 0).sort((a, b) => a.t - b.t).filter(e => { const key = e.n + ":" + Math.round(e.t * 200); if (seen.has(key)) return false; seen.add(key); return true; });
+  S.gen = { drums: dd, bass: bass.filter(e => e.t >= 0), keys: keys.filter(e => e.t >= 0), chords: chords.filter(e => e.t >= 0), markers, chordTxt, style, kInst };
 }
+const H8 = (n, on, off) => [0, 2, 4, 6, 8, 10, 12, 14].map(p => [p, n, p % 4 === 0 ? on : off]);
+function groovePat(style, L, alt, half) {
+  if (half) return style === "indie" ? [[0, K, 104], [8, K, 96], [12, SN, 110], ...[0, 2, 4, 6, 8, 10, 12, 14].map(p => [p, T3, p % 4 === 0 ? 92 : 74])]
+    : [[0, K, 104], [10, K, 90], [8, SN, 112], ...H8(RD, 84, 64)];
+  const G = {
+    poprock: {
+      0: [[0, K, 88], [8, K, 76, alt ? 1 : 0], ...[0, 4, 8, 12].map(p => [p, HH, 62])],
+      1: alt ? [[0, K, 102], [6, K, 80, .7], [8, K, 96], [4, SN, 104], [12, SN, 108], ...H8(HH, 84, 58), [11, SN, 26, .45]]
+             : [[0, K, 102], [8, K, 96], [10, K, 80, .6], [4, SN, 104], [12, SN, 106], ...H8(HH, 84, 58), [7, SN, 28, .5], [15, SN, 25, .35]],
+      2: alt ? [[0, K, 110], [3, K, 76, .5], [8, K, 104], [10, K, 92], [4, SN, 118], [12, SN, 120], ...H8(RD, 90, 70), [0, HH, 70], [8, HH, 70]]
+             : [[0, K, 110], [6, K, 88], [8, K, 104], [10, K, 90], [4, SN, 118], [12, SN, 120], ...H8(RD, 92, 72), [0, HH, 72], [8, HH, 72]],
+    },
+    indie: {
+      0: [...H8(HH, 64, 46), [0, K, 86], [8, K, 80]],
+      1: [[0, K, 98], [4, K, 86], [8, K, 94], [12, K, 86], [14, K, 76, alt ? .7 : 0], [4, SN, 102], [12, SN, 104], ...H8(HH, 82, 58)],
+      2: [[0, K, 108], [4, K, 96], [8, K, 104], [12, K, 96], [7, K, 74, .4], [4, SN, 116], [12, SN, 118], ...[0, 4, 8, 12].map(p => [p, HH, 86]), ...[2, 6, 10, 14].map(p => [p, OH, 76])],
+    },
+    ballata: {
+      0: [[0, K, 76], [0, HH, 50], [8, HH, 44]],
+      1: alt ? [[0, K, 92], [6, K, 70, .5], [10, K, 78], [8, SS, 88], ...H8(HH, 62, 42)] : [[0, K, 92], [10, K, 78], [8, SS, 88], ...H8(HH, 62, 42)],
+      2: [[0, K, 104], [10, K, 90], [11, K, 70, .4], [8, SN, 116], ...H8(RD, 82, 62), [14, SN, 26, .5]],
+    },
+  };
+  return (G[style] || G.poprock)[L];
+}
+function FILLS(from, n, style) {
+  const C = (arr, v0, dv) => arr.map(([p, note], j) => [p, note, Math.min(124, v0 + j * dv)]);
+  if (from >= 14) return [[[14, SN, 88], [15, SN, 96]], [[14, T1, 90], [15, T3, 98]]][n % 2];
+  if (from >= 12) return C([[[12, SN], [13, SN], [14, T3], [15, T3]], [[12, T1], [13, T1], [14, T2], [15, T3]], [[12, SN], [14, SN], [15, SN]]][n % 3], 80, 7).concat([[12, K, 92]]);
+  const T = style === "ballata"
+    ? [[[8, SN], [10, SN], [12, T1], [13, T2], [14, T3], [15, T3]], [[8, T1], [10, T2], [12, T3], [14, SN], [15, SN]]]
+    : [[[8, SN], [9, SN], [10, T1], [11, T1], [12, T2], [13, T2], [14, T3], [15, T3]], [[8, SN], [10, SN], [11, SN], [12, T1], [13, T2], [14, T3], [15, T3]], [[8, T1], [9, T1], [10, T2], [11, T2], [12, T3], [13, T3], [14, SN], [15, SN]], [[8, SN], [9, SN], [10, SN], [11, SN], [12, SN], [13, SN], [14, SN], [15, SN]]];
+  return C(T[n % T.length], 74, 5).concat([[8, K, 96], [12, K, 92]]);
+}
+
+/* ---------- Campioni reali (Fluid R3, licenza MIT) ---------- */
+const SMP = { cache: {}, ok: null };
+async function loadInst(name) {
+  if (SMP.cache[name]) return SMP.cache[name];
+  const r = await fetch(`suoni/${name}.json`); if (!r.ok) throw new Error("campioni non trovati");
+  const data = await r.json(), dec = async z => { const bin = atob(z.file), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); z.buffer = await ctx().decodeAudioData(u.buffer); delete z.file; return z; };
+  if (Array.isArray(data)) { for (const z of data) await dec(z); SMP.cache[name] = data; }
+  else { for (const k of Object.keys(data)) for (const z of data[k]) await dec(z); SMP.cache[name] = data; }
+  return SMP.cache[name];
+}
+function zoneFor(zones, note) { let z = zones.find(z => note >= z.lo && note <= z.hi); if (!z) z = zones.reduce((a, b) => Math.abs((b.lo + b.hi) / 2 - note) < Math.abs((a.lo + a.hi) / 2 - note) ? b : a); return z; }
+async function renderSampled(events, kind, n, sr) {
+  const oc = new OfflineAudioContext(2, n, sr), bus = oc.createGain(); bus.connect(oc.destination);
+  const inst = await loadInst(kind === "drums" ? "batteria" : kind);
+  let openHat = null;
+  for (const e of events) {
+    const zones = kind === "drums" ? (inst[e.n] || inst[38]) : inst; if (!zones) continue;
+    const z = zoneFor(zones, e.n); if (!z || !z.buffer) continue;
+    const src = oc.createBufferSource(); src.buffer = z.buffer;
+    const detune = z.op - 100 * z.ct - z.ft; src.playbackRate.value = Math.pow(2, (100 * (kind === "drums" ? z.op / 100 : e.n) - detune) / 1200);
+    const g = oc.createGain(), vel = Math.pow(e.v / 127, kind === "drums" ? 1.6 : 1.3);
+    const pan = oc.createStereoPanner(); pan.pan.value = kind === "drums" ? (DRUM_PAN[e.n] || 0) : 0;
+    src.connect(g); g.connect(pan); pan.connect(bus);
+    const t = Math.max(0, e.t), base = (kind === "drums" ? (DRUM_GAIN_S[e.n] || 0.8) : kind === "basso" ? 0.9 : 0.5) * vel;
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(base, t + 0.003);
+    if (kind === "drums") {
+      if ((e.n === HH || e.n === PH || e.n === OH) && openHat) { openHat.gain.setTargetAtTime(0, t, 0.015); openHat = null; }
+      if (e.n === OH) openHat = g;
+      src.start(t);
+    } else {
+      const loop = z.le > z.ls + 100 && e.d > z.buffer.duration * 0.8;
+      if (loop) { src.loop = true; src.loopStart = z.ls / z.sr; src.loopEnd = z.le / z.sr; }
+      const rel = kind === "basso" ? 0.06 : kind === "pad" || kind === "organo" ? 0.5 : 0.25, end = t + e.d;
+      g.gain.setValueAtTime(base, end); g.gain.setTargetAtTime(0, end, rel / 3);
+      src.start(t); src.stop(end + rel * 2);
+    }
+  }
+  const out = await oc.startRendering();
+  return [out.getChannelData(0), out.getChannelData(1)];
+}
+const DRUM_GAIN_S = { [K]: 1, [SN]: 0.85, [SS]: 0.6, [HH]: 0.45, [PH]: 0.4, [OH]: 0.4, [RD]: 0.5, [CR]: 0.55, [T1]: 0.8, [T2]: 0.8, [T3]: 0.85 };
 
 /* ---------- Suoni dell'anteprima ---------- */
 function noiseGen(seed) { let s = seed; return () => { s = (s * 16807) % 2147483647; return s / 2147483647 * 2 - 1; }; }
@@ -1609,9 +1719,11 @@ async function renderDemo() {
   };
   const pad = x => { const y = new Float32Array(n); y.set(x.subarray(0, Math.min(n, x.length))); return y; };
   const pan = (x, p) => { const a = Math.cos((p + 1) * Math.PI / 4), b = Math.sin((p + 1) * Math.PI / 4); return [x.map(v => v * a), x.map(v => v * b)]; };
-  if (g.drums.length) { setStatus("Suono la batteria…", true); await tick(); let d = renderDrums(g.drums, n, sr); d = compAuto(d, sr, { r: 4, a: 8, rl: 120, gr: 3 }); addTrack(d, -22, -26); }
-  if (g.bass.length) { setStatus("Suono il basso…", true); await tick(); let b = renderBass(g.bass, n, sr); b = compAuto(b, sr, { r: 4, a: 10, rl: 120, gr: 3 }); addTrack(pan(b[0], 0), -24, null); }
-  if (g.keys.length) { setStatus("Suono le tastiere…", true); await tick(); addTrack(renderKeys(g.keys, n, sr), -30, -12); }
+  const real = $("#sounds").value === "real";
+  const rend = async (ev, kind, synth) => { if (real && SMP.ok !== false) { try { const o = await renderSampled(ev, kind, n, sr); SMP.ok = true; $("#soundsNote").textContent = ""; return o; } catch (e) { SMP.ok = false; $("#soundsNote").textContent = "Campioni non disponibili (servono la cartella \"suoni\" e il sito online): uso i suoni sintetici."; } } return synth(); };
+  if (g.drums.length) { setStatus("Suono la batteria…", true); await tick(); let d = await rend(g.drums, "drums", () => renderDrums(g.drums, n, sr)); d = compAuto(d, sr, { r: 4, a: 8, rl: 120, gr: 3 }); addTrack(d, -22, -26); }
+  if (g.bass.length) { setStatus("Suono il basso…", true); await tick(); let b = await rend(g.bass, "basso", () => { const m = renderBass(g.bass, n, sr)[0]; return pan(m, 0); }); b = compAuto(b, sr, { r: 4, a: 10, rl: 120, gr: 3 }); addTrack(b, -24, null); }
+  if (g.keys.length) { setStatus("Suono le tastiere…", true); await tick(); const ks = await rend(g.keys, g.kInst, () => renderKeys(g.keys, n, sr)); addTrack(ks, g.kInst === "pad" ? -29 : -27, g.kInst === "pianoforte" ? -16 : -12); }
   setStatus("Mixo voce e chitarra…", true); await tick();
   if (S.gtr) { let gt = [lr4(pad(S.gtr), "hp", 90, sr)]; gt = compAuto(gt, sr, { r: 2.5, a: 15, rl: 150, gr: 2 }); addTrack(pan(gt[0], -0.2), -23, -22); }
   if (S.vox) { let v = [lr4(pad(S.vox), "hp", 90, sr)]; v = compAuto(v, sr, { r: 4, a: 3, rl: 60, gr: 4 }); v = compAuto(v, sr, { r: 2, a: 20, rl: 250, gr: 2 }); addTrack(pan(v[0], 0), -19, -14); }
@@ -1660,7 +1772,7 @@ function buildMidi() {
   const tracks = [chunk(tempo, "Tempo e sezioni")];
   if (g.drums.length) tracks.push(chunk(notes(g.drums, 9, null), "Batteria"));
   if (g.bass.length) tracks.push(chunk(notes(g.bass, 0, 33), "Basso"));
-  if (g.keys.length) tracks.push(chunk(notes(g.keys, 1, 89), "Tastiere"));
+  if (g.keys.length) tracks.push(chunk(notes(g.keys, 1, { pianoforte: 0, "piano-elettrico": 4, pad: 89, organo: 16 }[g.kInst] ?? 0), "Tastiere"));
   const chordNotes = []; g.chords.forEach(c => QUAL[c.c.q].forEach(iv => chordNotes.push({ t: c.t, d: c.d, n: 48 + ((c.c.r + iv) % 12) + (iv >= 12 ? 12 : 0), v: 64 })));
   tracks.push(chunk(notes(chordNotes, 2, 0), "Accordi (guida)"));
   const head = [0x4d, 0x54, 0x68, 0x64, 0, 0, 0, 6, 0, 1, 0, tracks.length, (PPQ >> 8) & 255, PPQ & 255];

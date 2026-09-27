@@ -210,6 +210,44 @@ td.val{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:500}
 .proj-item select{width:auto;padding:4px 6px;font-size:.8rem}
 .proj-actions{display:flex;flex-wrap:wrap;gap:8px}
 .proj-status{margin:0;color:var(--muted);font-size:.85rem;min-height:1.2em}
+.stage{position:relative;border-radius:22px;padding:16px 20px 20px;background:radial-gradient(120% 90% at 50% 0%,#1d2356 0%,#0b0e24 58%,#070918 100%);border:1px solid #2b3366;color:#e6e9ff;overflow:hidden;box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 24px 60px rgba(5,8,30,.35)}
+.stage::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.02) 0 1px,transparent 1px 3px);pointer-events:none}
+.stage-top{position:relative;display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.stage-title{font-family:var(--display);font-weight:600;font-size:1rem;display:flex;align-items:center;gap:9px}
+.stage-title .dot{width:9px;height:9px;border-radius:50%;background:#3b4378;box-shadow:0 0 0 3px rgba(59,67,120,.25)}
+.stage.live .stage-title .dot{background:#ff5a6e;box-shadow:0 0 12px #ff5a6e;animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.45}}
+.stage-src{font-size:.82rem;color:#9aa3d6;padding:2px 10px;border-radius:99px;background:rgba(120,140,255,.12)}
+.stage-fs{margin-left:auto;border:1px solid #2f3872;background:rgba(120,140,255,.08);color:#c9cffa;border-radius:10px;width:34px;height:34px;display:grid;place-items:center;cursor:pointer}
+.stage-fs svg{width:16px;height:16px}
+.stage-grid{position:relative;display:grid;grid-template-columns:minmax(80px,160px) minmax(0,1fr) minmax(80px,160px);gap:18px;align-items:center}
+.spk{width:100%;height:auto;display:block;filter:drop-shadow(0 12px 22px rgba(0,0,0,.45))}
+.spk .wf,.spk .tw{transform-box:fill-box;transform-origin:center;will-change:transform}
+.spk .wfglow,.spk .twglow{stroke:var(--s4);opacity:.15;filter:drop-shadow(0 0 8px var(--s4))}
+.spk .twglow{stroke:var(--s5);filter:drop-shadow(0 0 6px var(--s5))}
+#stSpec{display:block;width:100%;height:170px}
+.stage-row{display:grid;grid-template-columns:160px minmax(0,1fr);gap:18px;margin-top:14px;align-items:center}
+#stScope{display:block;width:160px;height:160px}
+.meters{display:grid;grid-template-columns:auto auto 1fr;grid-template-rows:auto auto auto;gap:6px 18px;align-items:end}
+.lufs-live{grid-column:1/2}.lufs-live.small{grid-column:1/2}
+.lufs-live b{display:block;font-family:var(--display);font-weight:600;font-size:2.4rem;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums;color:#f1f3ff;text-shadow:0 0 18px rgba(108,140,255,.45)}
+.lufs-live.small b{font-size:1.3rem;text-shadow:none;color:#c9cffa}
+.lufs-live span{font-size:.72rem;color:#8e97cc}
+.bars{grid-column:2/3;grid-row:1/3;display:flex;gap:8px;height:110px}
+.bar{position:relative;width:14px;height:100%;background:#11153a;border-radius:4px;overflow:hidden;box-shadow:inset 0 0 0 1px #242b5e}
+.bar i{position:absolute;left:0;right:0;bottom:0;height:0;background:linear-gradient(to top,var(--s3),var(--s4));box-shadow:0 0 10px var(--s4)}
+.bar i.hot{background:linear-gradient(to top,var(--s2),var(--s1));box-shadow:0 0 12px var(--s1)}
+.bar em{position:absolute;left:0;right:0;height:2px;background:#f1f3ff;bottom:0}
+.bars-lab{grid-column:2/3;display:flex;gap:8px;font-size:.7rem;color:#8e97cc}.bars-lab span{width:14px;text-align:center}
+.corr{grid-column:3/4;grid-row:2/4;align-self:center}
+.corr-track{position:relative;height:8px;border-radius:99px;background:linear-gradient(90deg,rgba(255,90,110,.35),rgba(120,140,255,.18) 50%,rgba(72,213,151,.35))}
+.corr-track i{position:absolute;top:50%;width:14px;height:14px;border-radius:50%;transform:translate(-50%,-50%);background:var(--s3);box-shadow:0 0 12px var(--s3);left:100%}
+.corr-track i.bad{background:var(--s1);box-shadow:0 0 12px var(--s1)}
+.corr-lab{display:flex;justify-content:space-between;font-size:.7rem;color:#8e97cc;margin-top:6px}
+.stage:fullscreen{padding:36px 44px;display:flex;flex-direction:column;justify-content:center}
+.stage:fullscreen #stSpec{height:36vh}.stage:fullscreen .stage-grid{grid-template-columns:minmax(120px,260px) minmax(0,1fr) minmax(120px,260px)}
+@media (max-width:820px){.stage-grid{grid-template-columns:1fr 1fr}.stage-mid{grid-column:1/-1;order:3}.spk-wrap{max-width:150px;justify-self:center}.stage-row{grid-template-columns:1fr}#stScope{justify-self:center}}
+@media (prefers-reduced-motion:reduce){.stage.live .stage-title .dot{animation:none}}
 </style>
 </head>
 <body>
@@ -693,7 +731,7 @@ function issues(a) {
 const pct = v => Math.max(0, Math.min(100, (v + 24) / 20 * 100));
 function render() {
   if (!state.trackA) return;
-  $("#results").classList.remove("hidden");
+  $("#results").classList.remove("hidden"); buildStage(); sizeCanvases();
   const t = target(), a = state.trackA, p = state.procA, r = state.refA;
 
   $("#empty").classList.add("hidden");
@@ -1110,7 +1148,7 @@ function winLoud(ch, sr) { const I = loudness({ sr, ch }).I; return isFinite(I) 
 async function ensurePlan() {
   const key = state.track && (state.track.ch[0].length + ":" + (state.ref ? state.ref.ch[0].length : 0));
   if (LIVE.plan && LIVE.planFor === key) return LIVE.plan;
-  const { sr, ch } = state.track, n = ch[0].length;
+  const { sr, ch } = state.track, n = ch[0].length, wasQuiet = QUIET;
   QUIET = true;
   const plan = { dc: ch.map(x => { let s = 0; for (let i = 0; i < n; i++) s += x[i]; return s / n; }) };
   let p = 0; for (const x of ch) for (let i = 0; i < n; i++) { const v = Math.abs(x[i]); if (v > p) p = v; }
@@ -1122,7 +1160,7 @@ async function ensurePlan() {
     const bl = split4(ch[0], sr); await tick(); const br = split4(ch[1], sr);
     plan.bands = bl.map((b, i) => bandStats(b, br[i], sr)); plan.ref = rb;
   }
-  QUIET = false;
+  QUIET = wasQuiet;
   LIVE.plan = plan; LIVE.planFor = key; LIVE.glueThr = {};
   return plan;
 }
@@ -1284,14 +1322,14 @@ function startPlay(fadeIn = false) {
   const dur = pl.bufs.B.duration; if (pl.off >= dur - 0.05) pl.off = 0;
   const when = c.currentTime + 0.03, bTs = v.B.ts; pl.gains = {}; pl.src = {};
   for (const k in v) {
-    const g = c.createGain(); g.gain.value = 0; g.connect(c.destination);
+    const g = c.createGain(); g.gain.value = 0; g.connect(visIn());
     const s = c.createBufferSource(); s.buffer = pl.bufs[k]; s.connect(g);
     const off = Math.max(0, Math.min(pl.bufs[k].duration, pl.off + (bTs - v[k].ts) / v[k].buf.sr));
     s.start(when, off); pl.gains[k] = g; pl.src[k] = s;
   }
   const sB = pl.src.B;
   sB.onended = () => { if (pl.src && pl.src.B === sB) { stopPlay(); pl.off = 0; updatePos(); } };
-  pl.t0 = when; pl.playing = true;
+  pl.t0 = when; pl.playing = true; visStart(); visLabel();
   applyGains(); playIcon(true);
   const loop = () => {
     if (!pl.playing) return; updatePos();
@@ -1312,7 +1350,7 @@ function restartPlay() {
 function stopPlay() {
   if (pl.playing) pl.off = currentPos();
   if (pl.src) Object.values(pl.src).forEach(s => { try { s.onended = null; s.stop(); } catch (e) {} });
-  pl.src = null; pl.playing = false; cancelAnimationFrame(pl.raf);
+  pl.src = null; pl.playing = false; cancelAnimationFrame(pl.raf); visStop();
   playIcon(false);
 }
 function currentPos() { return pl.playing ? pl.off + Math.max(0, ctx().currentTime - pl.t0) : pl.off; }
@@ -1322,7 +1360,8 @@ function updatePos() {
   $("#posR").max = dur.toFixed(1); $("#posR").value = p.toFixed(1);
   $("#posT").textContent = `${fmtTime(p)} / ${fmtTime(dur)}`;
 }
-function select(w) {
+function visLabel() { const el = $("#stSrc"); if (!el) return; const b = { A: $("#selA"), P: $("#selP"), B: $("#selB") }[pl.which]; el.textContent = b ? b.textContent : ""; }
+function select(w) { setTimeout(visLabel, 0);
   pl.which = w;
   [["A", "#selA"], ["P", "#selP"], ["B", "#selB"]].forEach(([k, id]) => $(id).setAttribute("aria-pressed", w === k));
   applyGains();
@@ -1396,6 +1435,162 @@ $("#btnSave").addEventListener("click", async () => {
 });
 refClearButton($("#dropRef"));
 (async () => { const f = await sharedRefFile(); if (f) loadFile(f, "ref", true); })();
+
+/* ---------- Monitor dal vivo: casse, spettro, vettorscopio, misuratori ---------- */
+const VIS = { nodes: null, raf: 0, running: false, idle: 0, peakHold: [0, 0], peakT: [0, 0], bands: null, bandPeak: null, stHist: [], lastT: 0 };
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+function visIn() {
+  if (VIS.nodes) return VIS.nodes.input;
+  const c = ctx(), input = c.createGain(), split = c.createChannelSplitter(2), an = c.createAnalyser();
+  an.fftSize = 8192; an.smoothingTimeConstant = 0.72;
+  const aL = c.createAnalyser(), aR = c.createAnalyser(); aL.fftSize = aR.fftSize = 2048; aL.smoothingTimeConstant = aR.smoothingTimeConstant = 0.6;
+  // pesatura K (ITU BS.1770) per la loudness istantanea
+  const K = kCoefs(c.sampleRate), kL = [c.createIIRFilter([K.pb[0], K.pb[1], K.pb[2]], [1, K.pa[1], K.pa[2]]), c.createIIRFilter([1, -2, 1], [1, K.ra[1], K.ra[2]])], kR = [c.createIIRFilter([K.pb[0], K.pb[1], K.pb[2]], [1, K.pa[1], K.pa[2]]), c.createIIRFilter([1, -2, 1], [1, K.ra[1], K.ra[2]])];
+  const mL = c.createAnalyser(), mR = c.createAnalyser(); mL.fftSize = mR.fftSize = 32768;
+  input.connect(c.destination); input.connect(an); input.connect(split);
+  split.connect(aL, 0); split.connect(aR, 1);
+  split.connect(kL[0], 0); kL[0].connect(kL[1]); kL[1].connect(mL);
+  split.connect(kR[0], 1); kR[0].connect(kR[1]); kR[1].connect(mR);
+  VIS.nodes = { input, an, aL, aR, mL, mR, f: new Float32Array(an.frequencyBinCount), tL: new Float32Array(aL.fftSize), tR: new Float32Array(aR.fftSize), fL: new Float32Array(aL.frequencyBinCount), fR: new Float32Array(aR.frequencyBinCount), kbL: new Float32Array(mL.fftSize), kbR: new Float32Array(mR.fftSize) };
+  return input;
+}
+function speakerSVG(id) {
+  return `<svg class="spk" viewBox="0 0 200 330" aria-hidden="true">
+    <defs>
+      <radialGradient id="cone${id}" cx="50%" cy="42%" r="62%"><stop offset="0" stop-color="#4a5391"/><stop offset=".5" stop-color="#1c2248"/><stop offset="1" stop-color="#090c20"/></radialGradient>
+      <radialGradient id="cap${id}" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#8e97d6"/><stop offset="1" stop-color="#1b2150"/></radialGradient>
+      <radialGradient id="dome${id}" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#e9ecff"/><stop offset=".6" stop-color="#6d76b8"/><stop offset="1" stop-color="#20264f"/></radialGradient>
+      <linearGradient id="cab${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1b2046"/><stop offset="1" stop-color="#0a0d23"/></linearGradient>
+    </defs>
+    <rect x="6" y="6" width="188" height="318" rx="24" fill="url(#cab${id})" stroke="#2b3366" stroke-width="2"/>
+    <rect x="20" y="20" width="160" height="290" rx="16" fill="none" stroke="#232a58" stroke-width="1"/>
+    <circle class="twglow" cx="100" cy="72" r="38" fill="none" stroke-width="3"/>
+    <g class="tw"><circle cx="100" cy="72" r="30" fill="#0c1030" stroke="#39417a" stroke-width="3"/><circle cx="100" cy="72" r="15" fill="url(#dome${id})"/></g>
+    <circle class="wfglow" cx="100" cy="212" r="92" fill="none" stroke-width="4"/>
+    <circle cx="100" cy="212" r="84" fill="#0a0d24" stroke="#39417a" stroke-width="4"/>
+    <g class="wf">
+      <circle cx="100" cy="212" r="76" fill="#12173a" stroke="#2c3468" stroke-width="6"/>
+      <circle cx="100" cy="212" r="66" fill="url(#cone${id})"/>
+      <circle cx="100" cy="212" r="46" fill="none" stroke="#2a3164" stroke-width="1" opacity=".7"/>
+      <circle cx="100" cy="212" r="24" fill="url(#cap${id})"/>
+    </g>
+    <circle cx="100" cy="300" r="5" fill="#0c1030" stroke="#39417a"/>
+  </svg>`;
+}
+function buildStage() {
+  const res = $("#results"); if (!res || $("#stage")) return;
+  res.insertAdjacentHTML("afterbegin", `<section class="stage" id="stage" aria-label="Monitor d'ascolto">
+    <div class="stage-top"><span class="stage-title"><i class="dot"></i>Monitor</span><span class="stage-src" id="stSrc">in attesa</span><button class="stage-fs" id="stFs" type="button" aria-label="Schermo intero"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button></div>
+    <div class="stage-grid">
+      <div class="spk-wrap" id="spkL">${speakerSVG("L")}</div>
+      <div class="stage-mid">
+        <canvas id="stSpec" aria-label="Spettro in tempo reale"></canvas>
+        <div class="stage-row">
+          <canvas id="stScope" aria-label="Immagine stereo"></canvas>
+          <div class="meters">
+            <div class="lufs-live"><b id="stM">−∞</b><span>LUFS istantanei</span></div>
+            <div class="lufs-live small"><b id="stS">−∞</b><span>ultimi 3 s</span></div>
+            <div class="bars"><div class="bar"><i id="stBarL"></i><em id="stPkL"></em></div><div class="bar"><i id="stBarR"></i><em id="stPkR"></em></div></div>
+            <div class="bars-lab"><span>L</span><span>R</span></div>
+            <div class="corr"><div class="corr-track"><i id="stCorr"></i></div><div class="corr-lab"><span>−1</span><span>fase</span><span>+1</span></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="spk-wrap" id="spkR">${speakerSVG("R")}</div>
+    </div>
+  </section>`);
+  $("#stFs").addEventListener("click", () => { const s = $("#stage"); if (document.fullscreenElement) document.exitFullscreen(); else if (s.requestFullscreen) s.requestFullscreen(); });
+  window.addEventListener("resize", () => sizeCanvases());
+  sizeCanvases(); drawIdle();
+}
+function sizeCanvases() {
+  const dpr = window.devicePixelRatio || 1;
+  ["#stSpec", "#stScope"].forEach(s => { const c = $(s); if (!c) return; c.width = c.clientWidth * dpr; c.height = c.clientHeight * dpr; c.getContext("2d").setTransform(dpr, 0, 0, dpr, 0, 0); });
+}
+const cv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function drawIdle() {
+  const c = $("#stSpec"); if (!c) return; const g = c.getContext("2d"), W = c.clientWidth, H = c.clientHeight;
+  g.clearRect(0, 0, W, H); g.strokeStyle = "rgba(120,140,255,.10)"; g.lineWidth = 1;
+  for (let y = 0; y < H; y += 24) { g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke(); }
+  const s = $("#stScope"); if (s) { const q = s.getContext("2d"); q.clearRect(0, 0, s.clientWidth, s.clientHeight); scopeGrid(q, s.clientWidth, s.clientHeight); }
+}
+function scopeGrid(g, W, H) {
+  const cx = W / 2, cy = H / 2, r = Math.min(W, H) / 2 - 6;
+  g.strokeStyle = "rgba(120,140,255,.14)"; g.lineWidth = 1;
+  g.beginPath(); g.arc(cx, cy, r, 0, Math.PI * 2); g.stroke();
+  g.beginPath(); g.moveTo(cx, cy - r); g.lineTo(cx, cy + r); g.moveTo(cx - r, cy); g.lineTo(cx + r, cy); g.stroke();
+  g.fillStyle = "rgba(160,170,230,.5)"; g.font = "10px 'Instrument Sans', sans-serif"; g.textAlign = "center"; g.fillText("M", cx, cy - r + 12); g.fillText("L", cx - r * 0.72, cy - r * 0.72 + 4); g.fillText("R", cx + r * 0.72, cy - r * 0.72 + 4);
+}
+function visStart() { if (VIS.running) return; VIS.running = true; VIS.idle = 0; $("#stage")?.classList.add("live"); cancelAnimationFrame(VIS.raf); VIS.raf = requestAnimationFrame(visLoop); }
+function visStop() { VIS.running = false; $("#stage")?.classList.remove("live"); }
+const dbx = v => 20 * Math.log10(Math.max(v, 1e-9));
+function visLoop(now) {
+  const N = VIS.nodes; if (!N || !$("#stage")) return;
+  const sr = ctx().sampleRate, dt = VIS.lastT ? (now - VIS.lastT) / 1000 : 0.016; VIS.lastT = now;
+  N.aL.getFloatTimeDomainData(N.tL); N.aR.getFloatTimeDomainData(N.tR);
+  N.aL.getFloatFrequencyData(N.fL); N.aR.getFloatFrequencyData(N.fR); N.an.getFloatFrequencyData(N.f);
+  // bassi e alti per canale: muovono woofer e tweeter
+  const band = (arr, lo, hi, size) => { const bw = sr / size; let s = 0, c = 0; for (let k = Math.max(1, Math.floor(lo / bw)); k <= Math.min(arr.length - 1, Math.ceil(hi / bw)); k++) { s += Math.pow(10, arr[k] / 20); c++; } return c ? s / c : 0; };
+  const lowL = band(N.fL, 30, 140, N.aL.fftSize), lowR = band(N.fR, 30, 140, N.aR.fftSize), hiL = band(N.fL, 4000, 14000, N.aL.fftSize), hiR = band(N.fR, 4000, 14000, N.aR.fftSize);
+  const norm = (v, ref) => Math.max(0, Math.min(1, (dbx(v) - ref) / 30));
+  moveSpeaker("#spkL", norm(lowL, -62), norm(hiL, -78)); moveSpeaker("#spkR", norm(lowR, -62), norm(hiR, -78));
+  drawSpec(N, sr); drawScope(N);
+  // misuratori
+  let pL = 0, pR = 0, sLR = 0, sLL = 0, sRR = 0; const n = N.tL.length;
+  for (let i = 0; i < n; i++) { const l = N.tL[i], r = N.tR[i]; pL = Math.max(pL, Math.abs(l)); pR = Math.max(pR, Math.abs(r)); sLR += l * r; sLL += l * l; sRR += r * r; }
+  const corrV = sLL > 1e-9 && sRR > 1e-9 ? sLR / Math.sqrt(sLL * sRR) : 1;
+  [pL, pR].forEach((p, i) => { const d = Math.max(-60, dbx(p)); if (d > VIS.peakHold[i] || now - VIS.peakT[i] > 1500) { VIS.peakHold[i] = d; VIS.peakT[i] = now; } });
+  const pct = d => Math.max(0, Math.min(100, (d + 60) / 60 * 100));
+  $("#stBarL").style.height = pct(dbx(pL)) + "%"; $("#stBarR").style.height = pct(dbx(pR)) + "%";
+  $("#stPkL").style.bottom = pct(VIS.peakHold[0]) + "%"; $("#stPkR").style.bottom = pct(VIS.peakHold[1]) + "%";
+  $("#stBarL").classList.toggle("hot", pL > 0.89); $("#stBarR").classList.toggle("hot", pR > 0.89);
+  $("#stCorr").style.left = ((corrV + 1) / 2 * 100) + "%"; $("#stCorr").classList.toggle("bad", corrV < 0);
+  N.mL.getFloatTimeDomainData(N.kbL); N.mR.getFloatTimeDomainData(N.kbR);
+  const m = Math.round(0.4 * sr); let ms = 0; for (let i = N.kbL.length - m; i < N.kbL.length; i++) ms += N.kbL[i] * N.kbL[i] + N.kbR[i] * N.kbR[i];
+  const mom = -0.691 + 10 * Math.log10(ms / m + 1e-12);
+  VIS.stHist.push([now, ms / m]); while (VIS.stHist.length && now - VIS.stHist[0][0] > 3000) VIS.stHist.shift();
+  const st = -0.691 + 10 * Math.log10(VIS.stHist.reduce((a, b) => a + b[1], 0) / Math.max(1, VIS.stHist.length) + 1e-12);
+  $("#stM").textContent = mom > -60 ? f(mom) : "−∞"; $("#stS").textContent = st > -60 ? f(st) : "−∞";
+  const quiet = pL < 1e-4 && pR < 1e-4;
+  if (!VIS.running && quiet) { VIS.idle++; if (VIS.idle > 40) { drawIdle(); moveSpeaker("#spkL", 0, 0); moveSpeaker("#spkR", 0, 0); return; } }
+  VIS.raf = requestAnimationFrame(visLoop);
+}
+function moveSpeaker(sel, low, hi) {
+  const el = $(sel); if (!el) return;
+  const wf = el.querySelector(".wf"), tw = el.querySelector(".tw"), wg = el.querySelector(".wfglow"), tg = el.querySelector(".twglow");
+  if (!REDUCED) { wf.style.transform = `scale(${1 + 0.07 * Math.pow(low, 1.6)})`; tw.style.transform = `scale(${1 + 0.05 * hi})`; }
+  wg.style.opacity = 0.15 + 0.85 * Math.pow(low, 1.3); tg.style.opacity = 0.1 + 0.9 * hi;
+  wg.style.strokeWidth = 3 + 6 * low;
+}
+function drawSpec(N, sr) {
+  const c = $("#stSpec"), g = c.getContext("2d"), W = c.clientWidth, H = c.clientHeight, B = Math.max(24, Math.min(96, Math.floor(W / 9)));
+  if (!VIS.bands || VIS.bands.length !== B) { VIS.bands = new Float32Array(B); VIS.bandPeak = new Float32Array(B); }
+  g.clearRect(0, 0, W, H);
+  g.strokeStyle = "rgba(120,140,255,.08)"; g.lineWidth = 1; for (let y = 0; y < H; y += 24) { g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke(); }
+  const bw = sr / N.an.fftSize, grad = g.createLinearGradient(0, 0, W, 0);
+  ["--s1", "--s2", "--s3", "--s4", "--s5"].forEach((v, i) => grad.addColorStop(i / 4, cv(v)));
+  const gap = 2, w = W / B - gap;
+  for (let b = 0; b < B; b++) {
+    const f0 = 25 * Math.pow(800, b / B), f1 = 25 * Math.pow(800, (b + 1) / B); let m = -140;
+    for (let k = Math.floor(f0 / bw); k <= Math.ceil(f1 / bw) && k < N.f.length; k++) m = Math.max(m, N.f[k]);
+    const v = Math.max(0, Math.min(1, (m + 92) / 72 + b / B * 0.18));
+    VIS.bands[b] = Math.max(v, VIS.bands[b] * 0.86);
+    VIS.bandPeak[b] = Math.max(VIS.bands[b], VIS.bandPeak[b] - 0.006);
+    const h = VIS.bands[b] * (H - 8), x = b * (w + gap);
+    g.fillStyle = grad; g.globalAlpha = 0.9; g.fillRect(x, H - h, w, h);
+    g.globalAlpha = 0.25; g.fillRect(x, H - h - 6, w, 6);
+    g.globalAlpha = 1; g.fillStyle = "rgba(240,244,255,.85)"; g.fillRect(x, H - VIS.bandPeak[b] * (H - 8) - 2, w, 2);
+  }
+  g.globalAlpha = 1;
+}
+function drawScope(N) {
+  const c = $("#stScope"), g = c.getContext("2d"), W = c.clientWidth, H = c.clientHeight, cx = W / 2, cy = H / 2, r = Math.min(W, H) / 2 - 6;
+  g.fillStyle = "rgba(9,12,32,.28)"; g.fillRect(0, 0, W, H); scopeGrid(g, W, H);
+  g.fillStyle = cv("--s4"); g.globalAlpha = 0.55;
+  const n = N.tL.length, k = 1.4 * r;
+  for (let i = 0; i < n; i += 2) { const l = N.tL[i], rr = N.tR[i], x = (rr - l) * 0.7071, y = (l + rr) * 0.7071; g.fillRect(cx + x * k, cy - y * k, 1.4, 1.4); }
+  g.globalAlpha = 1;
+}
 
 /* ---------- Collegamento al progetto ---------- */
 const PAGE = { single: true,
