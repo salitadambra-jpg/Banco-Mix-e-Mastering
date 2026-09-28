@@ -179,7 +179,7 @@ td.val{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:500}
   .issues li{grid-template-columns:1fr}
 }
 
-.tools{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;padding:3px;border-radius:12px;background:var(--raise);margin-top:16px}
+.tools{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:3px;border-radius:12px;background:var(--raise);margin-top:16px}
 .tools a{text-align:center;padding:6px 2px;border-radius:9px;font-weight:600;font-size:.76rem;color:var(--muted);text-decoration:none}
 .tools a:hover{color:var(--ink)}
 .tools a[aria-current=page]{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px color-mix(in srgb,var(--ink) 18%,transparent)}
@@ -210,7 +210,7 @@ td.val{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:500}
 .proj-item select{width:auto;padding:4px 6px;font-size:.8rem}
 .proj-actions{display:flex;flex-wrap:wrap;gap:8px}
 .proj-status{margin:0;color:var(--muted);font-size:.85rem;min-height:1.2em}
-.stage{position:relative;border-radius:22px;padding:16px 20px 20px;background:radial-gradient(120% 90% at 50% 0%,#1d2356 0%,#0b0e24 58%,#070918 100%);border:1px solid #2b3366;color:#e6e9ff;overflow:hidden;box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 24px 60px rgba(5,8,30,.35)}
+.stage{flex:none;position:relative;border-radius:22px;padding:16px 20px 20px;background:radial-gradient(120% 90% at 50% 0%,#1d2356 0%,#0b0e24 58%,#070918 100%);border:1px solid #2b3366;color:#e6e9ff;overflow:hidden;box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 24px 60px rgba(5,8,30,.35)}
 .stage::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.02) 0 1px,transparent 1px 3px);pointer-events:none}
 .stage-top{position:relative;display:flex;align-items:center;gap:12px;margin-bottom:12px}
 .stage-title{font-family:var(--display);font-weight:600;font-size:1rem;display:flex;align-items:center;gap:9px}
@@ -248,6 +248,17 @@ td.val{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:500}
 .stage:fullscreen #stSpec{height:36vh}.stage:fullscreen .stage-grid{grid-template-columns:minmax(120px,260px) minmax(0,1fr) minmax(120px,260px)}
 @media (max-width:820px){.stage-grid{grid-template-columns:1fr 1fr}.stage-mid{grid-column:1/-1;order:3}.spk-wrap{max-width:150px;justify-self:center}.stage-row{grid-template-columns:1fr}#stScope{justify-self:center}}
 @media (prefers-reduced-motion:reduce){.stage.live .stage-title .dot{animation:none}}
+.eqp canvas{display:block;width:100%;height:300px;border-radius:14px;background:radial-gradient(120% 100% at 50% 0%,#1a2050 0%,#0b0e24 70%);touch-action:none}
+.eqp .ctl{display:flex;gap:10px;align-items:center}
+.eqp .nb{border:1.5px solid var(--line);background:transparent;border-radius:9px;padding:6px 12px;font-weight:600;cursor:pointer;color:var(--ink)}
+.eqbands{display:grid;gap:6px;margin-top:12px}
+.eqb{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:8px 10px;border-radius:12px;background:var(--raise)}
+.eqb.sel{box-shadow:0 0 0 2px var(--s4)}
+.eqn{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--c);color:#0b0e24;font-weight:700;font-size:.8rem;box-shadow:0 0 10px var(--c)}
+.eqb select{width:auto;padding:5px 8px;font-size:.85rem}
+.eqb label{display:flex;align-items:center;gap:5px;font-size:.78rem;color:var(--muted)}
+.eqb input[type=number]{width:74px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:5px 7px;color:var(--ink);font:inherit;font-size:.85rem}
+.tog.mini .sw{width:30px;height:18px}.tog.mini .sw::after{width:12px;height:12px}.tog.mini input:checked + .sw::after{transform:translateX(12px)}
 </style>
 </head>
 <body>
@@ -262,6 +273,7 @@ td.val{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:500}
         <a href="intonazione-voce.html">Voce</a>
         <a href="allinea.html">Allinea</a>
         <a href="cori.html">Cori</a>
+        <a href="canale-voce.html">Canale</a>
         <a href="banco-mix.html">Mix</a>
         <a href="banco-mastering.html" aria-current="page">Mastering</a>
         <a href="controllo.html">Controllo</a>
@@ -368,6 +380,13 @@ td.val{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:500}
         </div>
         <div class="meter" id="meter"></div>
         <div class="ticks" id="ticks"></div>
+      </section>
+
+      <section class="panel eqp" id="eqPanel">
+        <div class="head-row"><h2>Equalizzatore</h2><div class="ctl"><label class="tog small"><input type="checkbox" id="oPeq" checked><span class="sw"></span>Attivo</label><button class="nb" id="eqReset" type="button">Azzera</button></div></div>
+        <canvas id="eqCv" aria-label="Curva dell'equalizzatore: trascina i punti"></canvas>
+        <div class="eqbands" id="eqBands"></div>
+        <p class="hint">Trascina i punti: in orizzontale la frequenza, in verticale il guadagno; con la rotella del mouse allarghi o stringi la banda. Doppio clic su uno spazio vuoto aggiunge un punto, doppio clic su un punto lo toglie. "Mid" agisce solo sul centro dello stereo, "Side" solo sui lati. Mentre ascolti senti subito il risultato.</p>
       </section>
 
       <section class="panel">
@@ -1110,6 +1129,7 @@ $("#btnFix").addEventListener("click", async () => {
       const curve = matchCurve(state.trackA.spec, state.refA.spec, $("#eqStr").value / 100);
       ch = await convolveStereo(ch[0], ch[1], firFromCurve(curve, sr));
     }
+    if (peqActive()) { setStatus("Equalizzatore…", true); await tick(); ch = peqApply(ch, sr); info.push("Equalizzatore: " + PEQ.bands.filter(bandActive).length + " bande attive."); }
     const mono = $("#oMono").checked;
     if (mono) { setStatus("Metto i bassi in mono…", true); await tick(); ch = monoBass(ch, sr, parseFloat($("#monoF").value)); }
     const mb = hasRef && $("#oMb").checked ? $("#mbStr").value / 100 : 0;
@@ -1192,6 +1212,7 @@ async function renderWindow(center) {
   let ch = orig.map(x => x.slice());
   if ($("#oDc").checked) { const hp = rbj("hp", 10, sr); ch = ch.map((x, c) => { const y = new Float32Array(x.length); for (let i = 0; i < x.length; i++) y[i] = x[i] - plan.dc[c]; return filt(y, hp); }); }
   if ($("#oEq").checked && hasRef) ch = await convolveStereo(ch[0], ch[1], firFor($("#eqStr").value / 100));
+  ch = peqApply(ch, sr);
   const mono = $("#oMono").checked;
   if (mono) ch = monoBass(ch, sr, parseFloat($("#monoF").value));
   const mb = hasRef && $("#oMb").checked ? $("#mbStr").value / 100 : 0, w = hasRef && $("#oW").checked ? $("#wStr").value / 100 : 0;
@@ -1478,7 +1499,7 @@ function speakerSVG(id) {
   </svg>`;
 }
 function buildStage() {
-  const res = $("#results"); if (!res || $("#stage")) return;
+  const res = document.querySelector(".main"); if (!res || $("#stage")) return;
   res.insertAdjacentHTML("afterbegin", `<section class="stage" id="stage" aria-label="Monitor d'ascolto">
     <div class="stage-top"><span class="stage-title"><i class="dot"></i>Monitor</span><span class="stage-src" id="stSrc">in attesa</span><button class="stage-fs" id="stFs" type="button" aria-label="Schermo intero"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button></div>
     <div class="stage-grid">
@@ -1534,7 +1555,7 @@ function visLoop(now) {
   const lowL = band(N.fL, 30, 140, N.aL.fftSize), lowR = band(N.fR, 30, 140, N.aR.fftSize), hiL = band(N.fL, 4000, 14000, N.aL.fftSize), hiR = band(N.fR, 4000, 14000, N.aR.fftSize);
   const norm = (v, ref) => Math.max(0, Math.min(1, (dbx(v) - ref) / 30));
   moveSpeaker("#spkL", norm(lowL, -62), norm(hiL, -78)); moveSpeaker("#spkR", norm(lowR, -62), norm(hiR, -78));
-  drawSpec(N, sr); drawScope(N);
+  drawSpec(N, sr); drawScope(N); if (typeof PEQ !== "undefined" && PEQ.view) PEQ.view.draw();
   // misuratori
   let pL = 0, pR = 0, sLR = 0, sLL = 0, sRR = 0; const n = N.tL.length;
   for (let i = 0; i < n; i++) { const l = N.tL[i], r = N.tR[i]; pL = Math.max(pL, Math.abs(l)); pR = Math.max(pR, Math.abs(r)); sLR += l * r; sLL += l * l; sRR += r * r; }
@@ -1591,6 +1612,129 @@ function drawScope(N) {
   for (let i = 0; i < n; i += 2) { const l = N.tL[i], rr = N.tR[i], x = (rr - l) * 0.7071, y = (l + rr) * 0.7071; g.fillRect(cx + x * k, cy - y * k, 1.4, 1.4); }
   g.globalAlpha = 1;
 }
+
+buildStage(); requestAnimationFrame(() => { sizeCanvases(); drawIdle(); });
+/* ---------- EQ grafico (componente comune) ---------- */
+function eqCoefs(type, f, g, q, sr) {
+  const A = Math.pow(10, g / 40), w = 2 * Math.PI * Math.min(f, sr * 0.49) / sr, c = Math.cos(w), s = Math.sin(w);
+  let b0, b1, b2, a0, a1, a2;
+  if (type === "peak") { const al = s / (2 * q); b0 = 1 + al * A; b1 = -2 * c; b2 = 1 - al * A; a0 = 1 + al / A; a1 = -2 * c; a2 = 1 - al / A; }
+  else if (type === "highpass") { const al = s / (2 * q); b0 = (1 + c) / 2; b1 = -(1 + c); b2 = (1 + c) / 2; a0 = 1 + al; a1 = -2 * c; a2 = 1 - al; }
+  else if (type === "lowpass") { const al = s / (2 * q); b0 = (1 - c) / 2; b1 = 1 - c; b2 = (1 - c) / 2; a0 = 1 + al; a1 = -2 * c; a2 = 1 - al; }
+  else { const al = s / 2 * Math.sqrt((A + 1 / A) * (1 / Math.min(q, 1.2) - 1) + 2), sq = 2 * Math.sqrt(A) * al;
+    if (type === "lowshelf") { b0 = A * ((A + 1) - (A - 1) * c + sq); b1 = 2 * A * ((A - 1) - (A + 1) * c); b2 = A * ((A + 1) - (A - 1) * c - sq); a0 = (A + 1) + (A - 1) * c + sq; a1 = -2 * ((A - 1) + (A + 1) * c); a2 = (A + 1) + (A - 1) * c - sq; }
+    else { b0 = A * ((A + 1) + (A - 1) * c + sq); b1 = -2 * A * ((A - 1) + (A + 1) * c); b2 = A * ((A + 1) + (A - 1) * c - sq); a0 = (A + 1) - (A - 1) * c + sq; a1 = 2 * ((A - 1) - (A + 1) * c); a2 = (A + 1) - (A - 1) * c - sq; } }
+  return { b: [b0 / a0, b1 / a0, b2 / a0], a: [1, a1 / a0, a2 / a0] };
+}
+function eqMagDb(co, f, sr) {
+  const w = 2 * Math.PI * f / sr, c1 = Math.cos(w), s1 = Math.sin(w), c2 = Math.cos(2 * w), s2 = Math.sin(2 * w);
+  const nr = co.b[0] + co.b[1] * c1 + co.b[2] * c2, ni = -(co.b[1] * s1 + co.b[2] * s2), dr = 1 + co.a[1] * c1 + co.a[2] * c2, di = -(co.a[1] * s1 + co.a[2] * s2);
+  return 10 * Math.log10((nr * nr + ni * ni) / (dr * dr + di * di) + 1e-30);
+}
+const bandActive = b => b.on && (b.type === "highpass" || b.type === "lowpass" || Math.abs(b.g) > 0.05);
+function EQView(canvas, opt) {
+  const V = { bands: opt.bands, sel: -1, drag: null, fMin: 20, fMax: 20000, gMax: opt.gMax || 15 };
+  const colors = ["--s1", "--s2", "--s3", "--s4", "--s5", "--s1", "--s3", "--s5"];
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const geo = () => { const W = canvas.clientWidth, H = canvas.clientHeight; return { W, H, X: f => 34 + Math.log10(f / V.fMin) / Math.log10(V.fMax / V.fMin) * (W - 42), F: x => V.fMin * Math.pow(V.fMax / V.fMin, (x - 34) / (W - 42)), Y: g => 10 + (V.gMax - g) / (2 * V.gMax) * (H - 30), G: y => V.gMax - (y - 10) / (H - 30) * 2 * V.gMax }; };
+  function draw() {
+    const dpr = window.devicePixelRatio || 1, { W, H, X, Y } = geo(); if (!W) return;
+    if (canvas.width !== Math.round(W * dpr) || canvas.height !== Math.round(H * dpr)) { canvas.width = W * dpr; canvas.height = H * dpr; }
+    const g = canvas.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
+    g.font = "11px 'Instrument Sans', sans-serif"; g.lineWidth = 1;
+    [30, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000].forEach(fr => { g.strokeStyle = "rgba(130,145,230,.12)"; g.beginPath(); g.moveTo(X(fr), 8); g.lineTo(X(fr), H - 20); g.stroke(); g.fillStyle = "rgba(160,170,230,.65)"; g.textAlign = "center"; g.fillText(fr >= 1000 ? fr / 1000 + "k" : fr, X(fr), H - 6); });
+    for (let db = -V.gMax + (V.gMax % 6); db <= V.gMax; db += 6) { g.strokeStyle = db === 0 ? "rgba(200,210,255,.3)" : "rgba(130,145,230,.12)"; g.beginPath(); g.moveTo(34, Y(db)); g.lineTo(W - 8, Y(db)); g.stroke(); g.fillStyle = "rgba(160,170,230,.65)"; g.textAlign = "right"; g.fillText((db > 0 ? "+" : "") + db, 28, Y(db) + 4); }
+    // spettro
+    const sp = opt.getSpectrum ? opt.getSpectrum() : null;
+    if (sp) {
+      const grad = g.createLinearGradient(0, 0, W, 0); ["--s1", "--s2", "--s3", "--s4", "--s5"].forEach((v, i) => grad.addColorStop(i / 4, css(v)));
+      g.beginPath(); g.moveTo(34, H - 20);
+      const yS = v => Math.max(10, H - 20 - Math.max(0, Math.min(1, v)) * (H - 34));
+      if (sp.fft) { for (let x = 34; x <= W - 8; x += 2) { const fr = geo().F(x), k = Math.round(fr / sp.bw), v = (sp.fft[k] + 95) / 80 + (Math.log10(fr / 1000) * 0.08); g.lineTo(x, yS(v)); } }
+      else sp.f.forEach((fr, i) => { if (fr >= V.fMin && fr <= V.fMax) g.lineTo(X(fr), yS((sp.db[i] + 42) / 38)); });
+      g.lineTo(W - 8, H - 20); g.closePath(); g.fillStyle = grad; g.globalAlpha = 0.18; g.fill(); g.globalAlpha = 0.5; g.strokeStyle = grad; g.stroke(); g.globalAlpha = 1;
+    }
+    // curve: stereo (o centro) e lati
+    const sr = 48000, anyS = V.bands.some(b => bandActive(b) && b.ms === "s"), anyM = V.bands.some(b => bandActive(b) && b.ms === "m");
+    const curve = mode => { const pts = []; for (let x = 34; x <= W - 8; x += 2) { const fr = geo().F(x); let s = 0; V.bands.forEach(b => { if (!bandActive(b)) return; if (mode === "m" && b.ms === "s") return; if (mode === "s" && b.ms === "m") return; const n = b.type === "highpass" && b.steep ? 2 : 1; s += n * eqMagDb(eqCoefs(b.type, b.f, b.g, b.q, sr), fr, sr); }); pts.push([x, Y(Math.max(-V.gMax, Math.min(V.gMax, s)))]); } return pts; };
+    const drawCurve = (pts, col, w) => { g.beginPath(); pts.forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.strokeStyle = col; g.lineWidth = w; g.shadowColor = col; g.shadowBlur = 10; g.stroke(); g.shadowBlur = 0; };
+    const main = curve("m");
+    g.beginPath(); g.moveTo(34, Y(0)); main.forEach(([x, y]) => g.lineTo(x, y)); g.lineTo(W - 8, Y(0)); g.closePath(); g.fillStyle = css("--s4"); g.globalAlpha = 0.12; g.fill(); g.globalAlpha = 1;
+    drawCurve(main, css("--s4"), 2.5);
+    if (anyS || anyM) drawCurve(curve("s"), css("--s5"), 1.8);
+    // punti
+    V.bands.forEach((b, i) => {
+      const x = X(b.f), y = b.type === "highpass" || b.type === "lowpass" ? Y(-V.gMax / 2) : Y(b.g), col = css(colors[i % colors.length]), r = i === V.sel ? 11 : 9;
+      g.globalAlpha = b.on ? 1 : 0.35; g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fillStyle = col; g.shadowColor = col; g.shadowBlur = i === V.sel ? 16 : 8; g.fill(); g.shadowBlur = 0;
+      g.fillStyle = "#0b0e24"; g.font = "700 11px 'Instrument Sans', sans-serif"; g.textAlign = "center"; g.fillText(opt.labels ? opt.labels[i] : String(i + 1), x, y + 4); g.globalAlpha = 1;
+      if (b.ms && b.ms !== "st") { g.fillStyle = col; g.font = "600 10px 'Instrument Sans', sans-serif"; g.fillText(b.ms === "m" ? "M" : "S", x, y - r - 4); }
+    });
+  }
+  function hit(e) { const r = canvas.getBoundingClientRect(), { X, Y } = geo(), x = e.clientX - r.left, y = e.clientY - r.top; let best = -1, bd = 16; V.bands.forEach((b, i) => { const d = Math.hypot(X(b.f) - x, (b.type === "highpass" || b.type === "lowpass" ? Y(-V.gMax / 2) : Y(b.g)) - y); if (d < bd) { bd = d; best = i; } }); return { i: best, x, y }; }
+  canvas.addEventListener("pointerdown", e => { const h = hit(e); V.sel = h.i; if (h.i >= 0) { V.drag = { i: h.i }; canvas.setPointerCapture(e.pointerId); } opt.onSelect && opt.onSelect(V.sel); draw(); });
+  canvas.addEventListener("pointermove", e => {
+    if (!V.drag) { canvas.style.cursor = hit(e).i >= 0 ? "grab" : "crosshair"; return; }
+    const r = canvas.getBoundingClientRect(), { F, G } = geo(), b = V.bands[V.drag.i];
+    if (!b.lockF) b.f = Math.round(Math.max(b.fMin || V.fMin, Math.min(b.fMax || V.fMax, F(e.clientX - r.left))));
+    if (!b.lockG && b.type !== "highpass" && b.type !== "lowpass") b.g = Math.round(Math.max(b.gMin ?? -V.gMax, Math.min(b.gMax ?? V.gMax, G(e.clientY - r.top))) * 2) / 2;
+    opt.onChange && opt.onChange(b, V.drag.i); draw();
+  });
+  canvas.addEventListener("pointerup", () => { V.drag = null; });
+  canvas.addEventListener("wheel", e => { const h = hit(e); if (h.i < 0) return; e.preventDefault(); const b = V.bands[h.i]; if (b.lockQ) return; b.q = Math.max(0.3, Math.min(8, b.q * (e.deltaY < 0 ? 1.12 : 1 / 1.12))); opt.onChange && opt.onChange(b, h.i); draw(); }, { passive: false });
+  canvas.addEventListener("dblclick", e => { const h = hit(e); if (opt.onDouble) opt.onDouble(h, geo()); draw(); });
+  window.addEventListener("resize", draw);
+  V.draw = draw; return V;
+}
+function applyEQBands(ch, sr, bands) {
+  const act = bands.filter(bandActive); if (!act.length) return ch;
+  let L = ch[0], R = ch[1] || ch[0];
+  const needMS = act.some(b => b.ms === "m" || b.ms === "s"), n = L.length;
+  let M, S;
+  if (needMS) { M = new Float32Array(n); S = new Float32Array(n); for (let i = 0; i < n; i++) { M[i] = (L[i] + R[i]) * 0.5; S[i] = (L[i] - R[i]) * 0.5; } }
+  for (const b of act) {
+    const co = eqCoefs(b.type, b.f, b.g, b.q, sr), times = b.type === "highpass" && b.steep ? 2 : 1;
+    for (let k = 0; k < times; k++) {
+      if (!needMS) { L = biquad(L, co.b, co.a); R = biquad(R, co.b, co.a); }
+      else { if (b.ms !== "s") M = biquad(M, co.b, co.a); if (b.ms !== "m") S = biquad(S, co.b, co.a); }
+    }
+  }
+  if (needMS) { L = new Float32Array(n); R = new Float32Array(n); for (let i = 0; i < n; i++) { L[i] = M[i] + S[i]; R[i] = M[i] - S[i]; } }
+  return [L, R];
+}
+/* ---------- Equalizzatore parametrico del Mastering ---------- */
+const PEQ = { bands: [
+  { on: true, type: "lowshelf", f: 80, g: 0, q: 0.7, ms: "st" }, { on: true, type: "peak", f: 250, g: 0, q: 1, ms: "st" },
+  { on: true, type: "peak", f: 1000, g: 0, q: 1, ms: "st" }, { on: true, type: "peak", f: 4000, g: 0, q: 1, ms: "st" },
+  { on: true, type: "highshelf", f: 12000, g: 0, q: 0.7, ms: "st" }] };
+const peqActive = () => $("#oPeq").checked && PEQ.bands.some(bandActive);
+const peqApply = (ch, sr) => peqActive() ? applyEQBands(ch, sr, PEQ.bands) : ch;
+const TYPES_IT = [["lowshelf", "Shelf bassi"], ["peak", "Campana"], ["highshelf", "Shelf alti"], ["highpass", "Passa-alto"], ["lowpass", "Passa-basso"]];
+function renderBandList() {
+  const cols = ["--s1", "--s2", "--s3", "--s4", "--s5", "--s1", "--s3", "--s5"];
+  $("#eqBands").innerHTML = PEQ.bands.map((b, i) => `<div class="eqb${i === PEQ.view.sel ? " sel" : ""}" data-i="${i}">
+    <span class="eqn" style="--c:var(${cols[i % cols.length]})">${i + 1}</span>
+    <select data-k="type" aria-label="Tipo della banda ${i + 1}">${TYPES_IT.map(([v, l]) => `<option value="${v}" ${b.type === v ? "selected" : ""}>${l}</option>`).join("")}</select>
+    <label>Hz<input type="number" data-k="f" min="20" max="20000" value="${Math.round(b.f)}"></label>
+    <label>dB<input type="number" data-k="g" min="-12" max="12" step="0.5" value="${b.g}" ${b.type === "highpass" || b.type === "lowpass" ? "disabled" : ""}></label>
+    <label>Q<input type="number" data-k="q" min="0.3" max="8" step="0.1" value="${b.q.toFixed(1)}"></label>
+    <select data-k="ms" aria-label="Canale della banda ${i + 1}"><option value="st" ${b.ms === "st" ? "selected" : ""}>Stereo</option><option value="m" ${b.ms === "m" ? "selected" : ""}>Mid</option><option value="s" ${b.ms === "s" ? "selected" : ""}>Side</option></select>
+    <label class="tog mini" title="Attiva"><input type="checkbox" data-k="on" ${b.on ? "checked" : ""} aria-label="Banda ${i + 1} attiva"><span class="sw"></span></label>
+  </div>`).join("");
+}
+function peqChanged() { PEQ.view.draw(); if (typeof scheduleLive === "function") scheduleLive(); }
+PEQ.view = EQView($("#eqCv"), { bands: PEQ.bands, gMax: 12,
+  getSpectrum: () => { if (VIS.running && VIS.nodes) { const a = VIS.nodes.an, d = new Float32Array(a.frequencyBinCount); a.getFloatFrequencyData(d); return { fft: d, bw: ctx().sampleRate / a.fftSize }; } const A = state.procA || state.trackA; return A ? { f: CENTERS, db: A.spec } : null; },
+  onChange: () => { renderBandList(); peqChanged(); }, onSelect: () => renderBandList(),
+  onDouble: (h, G) => { if (h.i >= 0 && PEQ.bands.length > 1) PEQ.bands.splice(h.i, 1); else if (h.i < 0 && PEQ.bands.length < 8) PEQ.bands.push({ on: true, type: "peak", f: Math.round(G.F(h.x)), g: Math.round(G.G(h.y) * 2) / 2, q: 1, ms: "st" }); PEQ.view.sel = -1; renderBandList(); peqChanged(); } });
+$("#eqBands").addEventListener("change", e => {
+  const row = e.target.closest(".eqb"); if (!row) return; const b = PEQ.bands[+row.dataset.i], k = e.target.dataset.k;
+  if (k === "on") b.on = e.target.checked; else if (k === "type" || k === "ms") b[k] = e.target.value;
+  else { const v = parseFloat(String(e.target.value).replace(",", ".")); if (isFinite(v)) b[k] = Math.max(+e.target.min, Math.min(+e.target.max, v)); }
+  PEQ.view.sel = +row.dataset.i; renderBandList(); peqChanged();
+});
+$("#oPeq").addEventListener("change", peqChanged);
+$("#eqReset").addEventListener("click", () => { PEQ.bands.forEach(b => b.g = 0); renderBandList(); peqChanged(); });
+renderBandList(); requestAnimationFrame(() => PEQ.view.draw());
 
 /* ---------- Collegamento al progetto ---------- */
 const PAGE = { single: true,
